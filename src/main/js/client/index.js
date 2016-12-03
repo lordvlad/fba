@@ -374,12 +374,7 @@ domready(function () {
 
       d3cola.on('tick', function () {
         node
-          .each((d) => {
-            (d.innerBounds = d.bounds.inflate(-margin))
-            if (d.bounds.width <0 || d.bounds.height<0) {
-              console.log(d)
-            }
-          })
+          .each((d) => (d.innerBounds = d.bounds.inflate(-margin)))
 
         link
           .each(makeRoute)
