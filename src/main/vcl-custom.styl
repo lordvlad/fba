@@ -5,12 +5,15 @@
 html, body
   height: 100%
 
-.sidebar
+.sidebar, .inner-sidebar
   background: var(--sidebar-background-color)
   color: var(--sidebar-color)
   
   & .vclNavigation .vclNavigationItem
    color: var(--sidebar-color)
+
+.inner-sidebar
+  background: color(var(--sidebar-background-color) l(+10))
 
 .vclContentArea
   height: 100%

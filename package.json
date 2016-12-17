@@ -17,6 +17,7 @@
     ]
   },
   "dependencies": {
+    "@reactivex/rxjs": "^5.0.1",
     "babel-preset-es2017": "^6.16.0",
     "babelify": "^7.3.0",
     "baobab": "^2.3.4",
