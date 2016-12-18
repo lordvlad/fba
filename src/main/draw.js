@@ -4,12 +4,8 @@ const d3 = window.d3 = require('d3')
 const { get } = require('./util')
 
 module.exports = function draw (graph, root) {
-  root.style.position = 'fixed'
-  root.style.left = 0
-  root.style.right = 0
-  root.style.zIndex = -1
-  let width = root.style.width = window.innerWidth
-  let height = root.style.height = window.innerHeight
+  let width = root.offsetWidth - 10
+  let height = root.offsetHeight - 10
   let margin = 6
   let pad = 12
 
@@ -30,15 +26,15 @@ module.exports = function draw (graph, root) {
     .attr('class', 'background')
     .attr('width', '100%')
     .attr('height', '100%')
-    .call(d3.behavior.zoom().on('zoom', redraw))
+
 
   let vis = outer
     .append('g')
     .attr('transform', 'translate(80,80) scale(0.7)')
 
-  function redraw () {
-    vis.attr('transform', 'translate(' + d3.event.translate + ')' + ' scale(' + d3.event.scale + ')')
-  }
+  outer.call(d3.behavior.zoom().scaleExtent([0.1, 10]).on('zoom', function () {
+    vis.attr('transform', `translate(${d3.event.translate}) scale(${d3.event.scale})`)
+  }))
 
   let groupsLayer = vis.append('g')
   let nodesLayer = vis.append('g')
@@ -49,7 +45,7 @@ module.exports = function draw (graph, root) {
     .links(graph.links)
     .groups(graph.groups)
     .constraints(graph.constraints)
-    .start()
+    .start(10, 15, 20)
 
   // define arrow markers for graph links
   outer.append('svg:defs')
@@ -74,7 +70,7 @@ module.exports = function draw (graph, root) {
     .attr('ry', 8)
     .attr('class', (d) => `group compartment ${d.id}`)
     .attr('style', (d) => d.style)
-    .call(d3cola.drag)
+    //.call(d3cola.drag)
 
   let link = linksLayer
     .selectAll('.link')
@@ -94,7 +90,7 @@ module.exports = function draw (graph, root) {
     .attr('height', (d) => (d.height || 0) + 2 * pad + 2 * margin)
     .attr('rx', (d) => d.rx || 0)
     .attr('ry', (d) => d.rx || 0)
-    .call(d3cola.drag)
+    //.call(d3cola.drag)
 
   let label = nodesLayer
     .selectAll('.label')
@@ -102,7 +98,7 @@ module.exports = function draw (graph, root) {
     .enter()
     .append('text')
     .attr('class', 'label')
-    .call(d3cola.drag)
+    //.call(d3cola.drag)
 
   let insertLinebreaks = function (d) {
     let el = d3.select(this)
