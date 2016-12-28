@@ -1,22 +1,22 @@
 /* global fetch */
 const { Subject } = require('rx-lite')
+const base = 'https://cors-anywhere.herokuapp.com/rest.kegg.jp/'
 
-const keggReaction = (t) => fetch(`http://localhost:1337/rest.kegg.jp/find/reaction/${t}`)
+const get = (id) => `${base}/get/${id}`
+const keggReaction = (t) => fetch(`${base}/find/reaction/${t}`)
   .then((t) => t.text())
   .then((t) => t.split('\n')
     .map((l) => l.match(/^([^\s]+)\s+(.*);\s+(.*)$/))
     .filter(Boolean)
-    .map(([_, id, names, reaction]) => ({ id, names, reaction }))
+    .map(([_, id, names, reaction]) => ({ id, names, reaction, href: get(id) }))
   )
 
-module.exports = function search (state) {
-  const input = new Subject()
-  const output = input
-    .filter((t) => t.length > 2)
-    .throttle(750)
-    .distinctUntilChanged()
-    .map(encodeURIComponent)
-    .flatMapLatest(keggReaction)
+const input = new Subject()
+const output = input
+  .filter((t) => t.length > 2)
+  .throttle(750)
+  .distinctUntilChanged()
+  .map(encodeURIComponent)
+  .flatMapLatest(keggReaction)
 
-  return {input, output}
-}
+module.exports = {input, output}

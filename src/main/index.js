@@ -1,184 +1,107 @@
-const assign = require('object-assign')
-const hyperx = require('hyperx')
-const { h, create, diff, patch } = require('virtual-dom')
-const hx = hyperx(h)
+const choo = require('choo')
+const frs = require('filereader-stream')
+const {Observable} = require('rx-lite')
+const show = require('ndarray-show')
 
 require('./index.styl')
+const mainView = require('./views')
+const hotkeys = require('./hotkeys')
+const { dnd } = require('./util')
+const { read, build } = require('./parser')
+const search = require('./search')
 
-const substate = require('./sub')
-const { DropHook, FocusHook } = require('./hooks')
-const { GraphWidget } = require('./widgets')
+const app = choo()
 
-const setter = (state, update) => (k, v) => update(assign(state, {[k]: v}))
+app.router(['/', mainView])
+app.model({
+  state: {
+    menu: { active: null, search: {term: '', busy: false, results: []} },
+    content: {}
+  },
+  reducers: {
+    activeMenu: (s, active) => {
+      s.menu.active = active === s.menu.active ? null : active
+      return s
+    },
+    setModel: (s, model) => {
+      s.content.model = model
+      return s
+    },
+    searchFor: (s, term) => {
+      if (term && term.length) search.input.onNext(term)
+      s.menu.search.term = term
+      s.menu.search.busy = term && term.length
+      return s
+    },
+    searchResults: (s, results) => {
+      s.menu.search.busy = false
+      s.menu.search.results = results
+      return s
+    }
+  },
+  effects: {
+    blur: (state, data, send, done) => {
+      document.activeElement.blur()
+      done()
+    },
+    focus: (state, id, send, done) => {
+      setTimeout(() => {
+        let e = document.querySelector(id)
+        if (e) e.focus()
+        done()
+      }, 10)
+    },
+    dropFiles: (state, files, send, done) => {
+      frs(files[0]).pipe(read()).pipe(build()).on('data', (m) => {
+        send('setModel', m, done)
+      })
+    },
+    runFBA: (state, files, send, done) => {
+      if (state.content.model) {
+        const model = state.content.model
+        const m = model.stoichiometricMatrix
 
-const callout = hx`
-  <div class="vclCallout vclInfo" style="margin: auto">
-    Start creating a metabolic network by
-    <ul>
-      <li>Drag and drop an SBML file anywhere on the page</li>
-      <li>Open the search tab and drag and drop reactions onto the page</li>
-    </ul> 
-  </div>
-`
-
-const state = {
-  side: {
-    selected: ''
+        console.log(show(m))
+      }
+    }
+  },
+  subscriptions: {
+    searchResultStream: (send, done) => {
+      search.output.subscribe((results) => {
+        send('searchResults', results, () => {})
+      })
+    },
+    hotkeys: (send, done) => {
+      Observable
+        .fromEvent(document.body, 'keyup')
+        .filter((e) => e.key === 'Escape' || (e.target ? e.target.nodeName !== 'INPUT' : true))
+        .map(hotkeys)
+        .filter(Boolean)
+        .subscribe((args) => args.forEach((a) => send(...[...a, () => {}])))
+      done()
+    },
+    drop: (send, done) => {
+      dnd(document.body, ({items, files}) => {
+        if (items.length) send('dropItems', items, () => {})
+        if (files.length) send('dropFiles', files, () => {})
+      })
+      done()
+    }
   }
-}
+})
 
-let search = require('./search')(state)
+const tree = app.start()
+document.body.appendChild(tree)
 
-let tree = render() // initial tree
-let root = create(tree) // rendered html dom
-document.body.appendChild(root) // appended to page
-
-function update () {
-  let newTree = render()
-  let patches = diff(tree, newTree)
-  root = patch(root, patches)
-  tree = newTree
-}
-
-require('./hotkeys')(state, update)
-
-function render () {
-  let updateGraph = (graph) => update(assign(state, {graph}))
-  return hx`
-    <div class="vclContentArea vclLayoutHorizontal vclLayoutFlex"
-          hook=${new DropHook(updateGraph, document.body)}>
-      ${sidebar(...substate(state, update, 'side'))}
-    <div style="overflow: hidden; width: 100%" class="vclCenter vclMiddle vclLayoutCenter vclLayoutHorizontal">
-        ${state.graph
-          ? new GraphWidget(state.graph)
-          : callout} 
-      </div>
-    </div>
-  `
-}
-
-function sidebar (state = {}, update) {
-  let set = setter(state, update)
-  let selected = state.selected
-
-  let sites = {
-    search: () => searchTab(...substate(state, update, 'search')),
-    network: () => hx`todo net`,
-    calculate: () => hx`todo calc`,
-    settings: () => settingsTab(...substate(state, update, 'settings'))
-  }
-
-  let li = (title, icon) => hx`
-    <li class="vclNavigationItem ${selected === title ? 'vclSelected' : ''}"
-        role=presentation aria-selected=false>
-      <a class=vclNavigationItemLabel title=${title} href="#"
-          onclick=${() => set('selected', selected === title ? null : title)}>
-        <i class="vclIcon fa fa-fw fa-${icon}"></i>
-      </a>
-    </li>
-  `
-
-  return hx`
-    <div class="vclLayoutHorizontal vlcLayoutFlex" style="height: 100%">
-      <div class="vclLayoutVertical sidebar">
-        <nav class="vclNavigation vclLayoutVertical vclLayoutFlex vclVertical">
-          <ul>
-            ${li('search', 'search')}
-            ${li('network', 'code-fork')}
-            ${li('calculate', 'calculator')}
-            ${li('settings', 'wrench')}
-          </ul>
-        </nav>
-      </div>
-      ${!selected ? '' : hx`
-        <div class="vclLayoutVertical inner-sidebar" style="width: 240px">
-          ${sites[selected]()}
-        </div>
-      `}
-    </div>
-  `
-}
-
-function settingsTab (state = {}, update) {
-  return hx`
-    <div>
-      <nav class="vclNavigation vclLayoutVertical vclLayoutFlex vclVertical">
-        <ul>
-        <li class="vclNavigationItem">
-          <a class=vclNavigationItemLabel title=search href="#">
-            todo 
-          </a>
-        </li>
-        </ul>
-      </nav>
-    </div>
-  `
-}
-
-function searchTab (state = {}, update) {
-  search.output.subscribe((results) => {
-    update(assign(state, {results, busy: false}))
-  })
-
-  let loading = hx`
-    <li class="vclDisabled vclNavigationItem">
-      <a class=vclNavigationItemLabel href=#>
-        loading ...
-      </a>
-    </li>
-  `
-  let empty = hx`
-    <li class="vclDisabled vclNavigationItem">
-      <a class=vclNavigationItemLabel href=#>
-        no results  
-      </a>
-    </li>
-  `
-
-  let result = ({id, names, reaction}) => hx`
-    <li class=vclNavigationItem>
-      <a class=vclNavigationItemLabel title=${names} href=#>
-        <small>${id}</small>
-        <b>${names}</b>
-        <small>${reaction}</small>
-      </a>
-    </li>`
-
-  let { busy, term, results, focus } = state
-  if (!term) term = ''
-  let setterm = (e) => {
-    let term = e ? e.target.value : ''
-    let busy = !!term
-    if (e) search.input.onNext(term)
-    update(assign(state, {term, busy}))
-  }
-  let clear = () => setterm()
-  let hideEraser = term ? '' : 'vclDisplayNone'
-  let hideSpinner = busy ? '' : 'vclDisplayNone'
-
-  return hx`
-    <div>
-      <div class="vclInputGroupEmb">
-        <input type=search placeholder=search onkeyup=${setterm}
-            hook=${focus === false ? null : new FocusHook()}
-            class="vclInput vclNoBorder vclAppItem" 
-            value=${term} id=search
-            autocomplete=off />
-        <div class="vclIcogram vlcTransparent vclSquare vclAppended ${hideSpinner}"
-            style="right: 1.2em">
-          <div class="vclIcon fa fa-spinner fa-spin" aria-hidden="true" aria-label="Clear" role="img"></div>
-        </div>
-        <button class="vclButton vclTransparent vclSquare vclAppended ${hideEraser}" onclick=${clear}>
-          <div class="vclIcogram">
-            <div class="vclIcon fa fa-times-circle" aria-hidden="true" aria-label="Clear" role="img"></div>
-          </div>
-        </button>
-      </div>
-      <nav class="vclNavigation vvclLayoutVertical vclLayoutFlex vclVertical">
-        <ul>
-        ${busy ? loading : results ? results.map(result) : empty}
-        </ul>
-      </nav>
-    </div>
-  `
-}
+// class Reaction {
+  // constructor (t) { this.t = t.split(/\n/) }
+  // get id () { this._id || (this.id = this._readId()) }
+  // get names () { this._names || (this._names = this._readNames()) }
+  // _readId () { return this.t[0].split(/\s+/)[1] }
+  // _readNames () {
+    // let x
+    // let readName = (s) => s.startsWith('NAME') ? (x = true && s.replace('NAME', '')) : (x && s.startsWith(' ')) ? s : (x = false)
+    // return this.t.map(readName).filter(Boolean).map((s) => s.trim())
+  // }
+// }
+// 

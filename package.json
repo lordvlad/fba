@@ -13,16 +13,23 @@
   "license": "ISC",
   "browserify": {
     "transform": [
-      "vee-cee-ellify"
+      "vee-cee-ellify",
+      "unassertify",
+      "yo-yoify"
     ]
+  },
+  "standard": {
+    "parser": "babel-eslint"
   },
   "dependencies": {
     "@reactivex/rxjs": "^5.0.1",
+    "assign-deep": "^0.4.5",
     "babel-preset-es2017": "^6.16.0",
     "babelify": "^7.3.0",
     "baobab": "^2.3.4",
     "browserify": "^13.1.1",
     "budo": "^9.2.2",
+    "choo": "^4.0.3",
     "d3": "3",
     "deep-assign": "^2.0.0",
     "domready": "^1.0.8",
@@ -33,12 +40,14 @@
     "main-loop": "^3.4.0",
     "morphdom": "^2.2.1",
     "ndarray": "^1.0.18",
+    "ndarray-show": "^2.0.0",
     "object-assign": "^4.1.0",
     "sax": "^1.2.1",
     "setprototypeof": "^1.0.2",
     "standard": "^8.6.0",
     "through2": "^2.0.3",
     "traverse": "^0.6.6",
+    "unassertify": "^2.0.4",
     "vcl-adv-text-structure": "^0.1.0",
     "vcl-callout": "^0.1.0",
     "vcl-core-modules": "^0.1.3",
@@ -46,6 +55,13 @@
     "vcl-default-theme-terms": "^0.1.0",
     "vcl-font-awesome": "^0.1.0",
     "virtual-dom": "^2.1.1",
-    "webcola": "^3.1.3"
+    "webcola": "^3.1.3",
+    "yo-yoify": "^3.5.0"
+  },
+  "devDependencies": {
+    "babel-eslint": "^7.1.1",
+    "babel-plugin-transform-async-generator-functions": "^6.17.0",
+    "babel-preset-es2016": "^6.16.0",
+    "babel-preset-stage-3": "^6.17.0"
   }
 }

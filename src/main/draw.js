@@ -15,7 +15,7 @@ module.exports = function draw (graph, root) {
     .size([width, height])
 
   let outer = d3
-    .select(root)
+    .select(root.createShadowRoot())
     .append('svg')
     .attr('width', width)
     .attr('height', height)
