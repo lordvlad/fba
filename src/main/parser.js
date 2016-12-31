@@ -1,71 +1,29 @@
 const through = require('through2')
-const traverse = require('traverse')
 const assign = require('object-assign')
 const sax = require('sax')
 const { last, pop, push } = require('./util')
-const {
-  Model,
-  Species,
-  Reaction,
-  Compartment,
-  create
-} = require('./classes')
+const { Model } = require('./classes')
+const omit = require('lodash/omit')
 
 module.exports = { read, build, mkgraph }
 
-function mkgraph (model, opt = {}) {
-  const seen = new Set()
-  const species = new Map()
-  const refs = new Map()
-  const compartments = new Map()
+const getChild = (o, $name) => o.$children.find((x) => x.$name === $name) || {}
+const listOf = (o, what) => getChild(o, `listOf${what}`).$children || []
+const clean = (o) => omit(o, ['$children', 'annotation', '$name'])
 
-  traverse(model).reduce(function (_, x) {
-    if (!seen.has(x)) {
-      seen.add(x)
+function mkgraph (o, opt = {}) {
+  let m = new Model(clean(o))
 
-      if (x instanceof Compartment) {
-        compartments.set(x.id, x)
-        let i = model.groups.push(assign(x, {groups: [], leaves: []})) - 1
-        if (x.outside) {
-          compartments.get(x.outside).groups.push(i)
-        }
-      } else if (x instanceof Species) {
-        model.species.push(x)
-        species.set(x.id, x)
-        x.compartment = compartments.get(x.compartment)
-      } else if (x instanceof Reaction) {
-        model.reactions.push(x)
-        let i = model.nodes.push(x) - 1
-        const comp = []
-        for (let t of ['Products', 'Reactants', 'Modifiers']) {
-          for (let r of (x['listOf' + t] || [])) {
-            let c
-            if (refs.has(r.species)) {
-              r = refs.get(r.species)
-              c = r.compartment
-            } else {
-              refs.set(r.species, r)
-              let s = r.species = species.get(r.species)
-              c = r.compartment = compartments.get(s.compartment.id)
-              let i = model.nodes.push(r) - 1
-              c.leaves.push(i)
-            }
-            if (comp.indexOf(c) === -1) comp.push(c)
-            let [source, target] = (t === 'Products') ? [r, x] : [x, r]
-            model.links.push({source, target})
-          }
-        }
-        if (comp.length === 1) {
-          comp[0].leaves.push(i)
-        } else {
-          x.transporter = true
-          // fixme put it on the border between two compartments
-          comp[0].leaves.push(i)
-        }
-      }
-    }
-  })
-  return model
+  for (let c of listOf(o, 'Compartments')) m.addCompartment(clean(c))
+  for (let c of listOf(o, 'Species')) m.addSpecies(clean(c))
+  for (let c of listOf(o, 'Reactions')) {
+    let r = m.addReaction(clean(c))
+    for (let s of listOf(c, 'Reactants')) r.addReactant(clean(s))
+    for (let s of listOf(c, 'Products')) r.addProduct(clean(s))
+    for (let s of listOf(c, 'Modifiers')) r.addModifier(clean(s))
+  }
+
+  return m
 }
 
 function build (opt = {}) {
@@ -81,19 +39,19 @@ function read (opt = {strict: true}) {
   let parser = mkparser()
 
   parser.on('error', (e) => dup.emit('error', e))
-  parser.on('opentag', (n) => push(stack, create(n)))
+  parser.on('opentag', (n) => push(stack, assign(n.attributes, {$name: n.name})))
   parser.on('closetag', (n) => {
     let o = pop(stack)
     let p = last(stack)
 
-    if (o instanceof Model) {
+    if (n.toLowerCase() === 'model') {
       dup.push(o)
       parser = mkparser() // FIXME see if we can go around building a new parser
       return
     }
 
-    if (Array.isArray(p)) p.push(o)
-    else p[n] = o
+    if (!p.$children) p.$children = []
+    p.$children.push(o)
   })
 
   return dup
