@@ -1,14 +1,28 @@
-const toKebab = require('./kebab')
 const cola = require('webcola')
+const assign = require('object-assign')
 const d3 = window.d3 = require('d3')
-const { get } = require('./util')
 
-module.exports = function draw (graph, root) {
+const { get } = require('./util')
+const { Transform, Pool } = require('./classes')
+
+const margin = 6
+const pad = 6
+
+const makeEdgeBetween = cola.vpsc.makeEdgeBetween
+const makeRoute = (d) => (d.route = makeEdgeBetween(d.source.innerBounds, d.target.innerBounds, pad))
+const translateLabel = (d) => `translate(${d.textBounds.x},${d.textBounds.Y})`
+
+function setSize (d) {
+  let b = this.getBBox()
+  assign(d, {width: b.width + 2 * (pad + margin), height: b.height + 2 * (pad + margin)})
+  d.innerBounds = d.bounds.inflate(-margin)
+  d.textBounds = d.innerBounds.inflate(-pad)
+}
+
+module.exports = function draw (model, root) {
+  let {graph} = model
   let width = root.offsetWidth - 10
   let height = root.offsetHeight - 10
-  let margin = 6
-  let pad = 12
-
   let d3cola = cola.d3adaptor()
     .linkDistance(60)
     .avoidOverlaps(true)
@@ -27,27 +41,18 @@ module.exports = function draw (graph, root) {
     .attr('width', '100%')
     .attr('height', '100%')
 
+  // define arrow markers for graph links
 
-  let vis = outer
-    .append('g')
-    .attr('transform', 'translate(80,80) scale(0.7)')
+  let vis = outer.append('g')
 
-  outer.call(d3.behavior.zoom().scaleExtent([0.1, 10]).on('zoom', function () {
-    vis.attr('transform', `translate(${d3.event.translate}) scale(${d3.event.scale})`)
-  }))
+  // vis.call(d3.behavior.zoom().scaleExtent([0.1, 10]).on('zoom', function () {
+  //   vis.attr('transform', `translate(${d3.event.translate}) scale(${d3.event.scale})`)
+  // }))
 
   let groupsLayer = vis.append('g')
   let nodesLayer = vis.append('g')
   let linksLayer = vis.append('g')
 
-  d3cola
-    .nodes(graph.nodes)
-    .links(graph.links)
-    .groups(graph.groups)
-    .constraints(graph.constraints)
-    .start(10, 15, 20)
-
-  // define arrow markers for graph links
   outer.append('svg:defs')
     .append('svg:marker')
     .attr('id', 'end-arrow')
@@ -61,74 +66,75 @@ module.exports = function draw (graph, root) {
     .attr('stroke-width', '0px')
     .attr('fill', '#000')
 
+  d3cola
+    .nodes(graph.nodes)
+    .links(graph.links)
+    .groups(graph.groups)
+    .constraints(graph.constraints)
+    .start()
+
   let group = groupsLayer
     .selectAll('.group')
     .data(graph.groups)
     .enter()
     .append('rect')
+    .attr('class', (d) => `group compartment ${d.id}`)
     .attr('rx', 8)
     .attr('ry', 8)
-    .attr('class', (d) => `group compartment ${d.id}`)
-    .attr('style', (d) => d.style)
-    //.call(d3cola.drag)
 
   let link = linksLayer
     .selectAll('.link')
     .data(graph.links)
     .enter()
     .append('line')
-    // .append('svg:path')
     .attr('class', 'link')
 
-  let node = nodesLayer
-    .selectAll('.node')
-    .data(graph.nodes)
+  let reactionNode = nodesLayer
+    .selectAll('.node.reaction')
+    .data(graph.nodes.filter((n) => n instanceof Transform))
     .enter()
     .append('rect')
-    .attr('class', (d) => `node ${toKebab(d.constructor.name)}`)
-    .attr('width', (d) => (d.width || 0) + 2 * pad + 2 * margin)
-    .attr('height', (d) => (d.height || 0) + 2 * pad + 2 * margin)
-    .attr('rx', (d) => d.rx || 0)
-    .attr('ry', (d) => d.rx || 0)
-    //.call(d3cola.drag)
+    .attr('class', get('className'))
+    .call(d3cola.drag)
+
+  let entityNode = nodesLayer
+    .selectAll('.node.pool')
+    .data(graph.nodes.filter((n) => n instanceof Pool))
+    .enter()
+    .append('circle')
+    .attr('class', get('className'))
+    .call(d3cola.drag)
+
+  nodesLayer.selectAll('.node').append('title').text(get('label'))
 
   let label = nodesLayer
     .selectAll('.label')
     .data(graph.nodes)
     .enter()
     .append('text')
+    .text((d) => get('label')(d).substr(0, 5))
     .attr('class', 'label')
-    //.call(d3cola.drag)
+    .call(d3cola.drag)
 
-  let insertLinebreaks = function (d) {
-    let el = d3.select(this)
-    el.text('')
-
-    d.label.split(' ').forEach((w) => {
-      el.append('tspan')
-        .text(w)
-        .attr('x', 0)
-        .attr('dy', '15')
-        .attr('font-size', '12')
-    })
-  }
-
-  label.each(insertLinebreaks)
-
-  node.append('title').text((d) => d.label)
-
-  const makeEdgeBetween = cola.vpsc.makeEdgeBetween
-  const makeRoute = (d) => (d.route = makeEdgeBetween(d.source.innerBounds, d.target.innerBounds, 5))
-  const translateLabel = (d) => 'translate(' + d.x + margin + ',' + (d.y + margin - d.height / 2) + ')'
-  const setLabelSize = function (d) {
-    let b = this.getBBox()
-    d.width = (b.width || 0) + 2 * margin + 8
-    d.height = (b.height || 0) + 2 * margin + 8
-  }
+  label.append('title').text(get('label'))
 
   const tick = function () {
-    node
-      .each((d) => (d.innerBounds = d.bounds.inflate(-margin)))
+    label.each(setSize)
+
+    label
+      .attr('transform', translateLabel)
+
+    reactionNode
+      .attr('x', get('innerBounds.x'))
+      .attr('y', get('innerBounds.y'))
+      .attr('width', get('innerBounds.width'))
+      .attr('height', 2 * (pad + margin) + 12)
+      // .attr('height', get('innerBounds.height'))
+
+    entityNode
+      .attr('cx', get('innerBounds.cx'))
+      .attr('cy', get('innerBounds.cy'))
+      .attr('r', (d) => d.innerBounds.height() / 2)
 
     link
       .each(makeRoute)
@@ -137,23 +143,11 @@ module.exports = function draw (graph, root) {
       .attr('x2', get('route.arrowStart.x'))
       .attr('y2', get('route.arrowStart.y'))
 
-    label
-      .each(setLabelSize)
-
-    node
-      .attr('x', get('innerBounds.x'))
-      .attr('y', get('innerBounds.y'))
-      .attr('width', get('innerBounds.width'))
-      .attr('height', get('innerBounds.height'))
-
     group
       .attr('x', get('bounds.x'))
       .attr('y', get('bounds.y'))
       .attr('width', get('bounds.width'))
       .attr('height', get('bounds.height'))
-
-    label
-      .attr('transform', translateLabel)
   }
 
   d3cola.on('tick', tick)
