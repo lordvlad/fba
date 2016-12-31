@@ -92,16 +92,3 @@ app.model({
 
 const tree = app.start()
 document.body.appendChild(tree)
-
-// class Reaction {
-  // constructor (t) { this.t = t.split(/\n/) }
-  // get id () { this._id || (this.id = this._readId()) }
-  // get names () { this._names || (this._names = this._readNames()) }
-  // _readId () { return this.t[0].split(/\s+/)[1] }
-  // _readNames () {
-    // let x
-    // let readName = (s) => s.startsWith('NAME') ? (x = true && s.replace('NAME', '')) : (x && s.startsWith(' ')) ? s : (x = false)
-    // return this.t.map(readName).filter(Boolean).map((s) => s.trim())
-  // }
-// }
-// 
