@@ -1,6 +1,9 @@
 .graph::shadow svg 
   font: 10px sans-serif;
 
+  text
+    user-select: none;
+
   .axis path, .axis line 
     fill: none;
     stroke: #000;
@@ -19,10 +22,10 @@
   .node.reaction 
     fill: lightcoral;
   
-  .node.species 
+  .node.pool
     fill: steelblue;
   
-  .node.species-reference 
+  .node.pool.clone
     fill: lightblue;
   
   .group.compartment.cell, .group.compartment.cytosol 
@@ -32,20 +35,23 @@
     fill: salmon;
   
   .link 
-      fill: none;
-      stroke: #000;
-      stroke-width: 3px;
-      opacity: 0.7;
-      marker-end: url(#end-arrow);
+    fill: none;
+    stroke: #000;
+    stroke-width: 3px;
+    opacity: 0.7;
+    marker-end: url(#end-arrow);
+  
+  .link.modifier
+    marker-end: url(#end-circle);
   
   .label 
-      fill: black;
-      font-family: Verdana;
-      font-size: 25px;
-      text-anchor: middle;
-      cursor: move;
+    fill: black;
+    font-family: Verdana;
+    font-size: 25px;
+    text-anchor: middle;
+    cursor: move;
   
   .guideline 
-      stroke: orangered;
-      stroke-width: 4px;
+    stroke: orangered;
+    stroke-width: 4px;
   
