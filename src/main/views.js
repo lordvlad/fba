@@ -16,7 +16,6 @@ const li = (title, icon = 'angle-right', onclick = notImpl) => html`
   </li>
 `
 
-
 function networkView (state, prev, send) {
   return html`
     <div>
@@ -60,6 +59,7 @@ function fileView (state, prev, send) {
     <div>
       <nav class="vclNavigation vclLayoutVertical vclLayoutFlex vclVertical">
         <ul>
+          ${li('new model', 'file-o', () => send('newModel'))}
           ${li('open sbml', 'folder-open-o', () => send('openFile'))}
           ${li('export sbml', 'save')}
           ${li('search biomodels', 'search')}
@@ -151,7 +151,7 @@ function menuView (state, prev, send) {
   }
 
   const tab = ({
-    file: () => wrap(fileView(state.file, prev && state.file, send)), 
+    file: () => wrap(fileView(state.file, prev && state.file, send)),
     search: () => wrap(searchView(state.search, prev && prev.search, send)),
     network: () => wrap(networkView(state.network, prev && prev.network, send)),
     calculate: () => wrap(calcView(state.clac, prev && state.calc, send)),
