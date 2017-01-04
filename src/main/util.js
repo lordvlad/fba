@@ -81,7 +81,19 @@ function dnd (element, callback) {
   element.addEventListener('drop', handleDrop.bind(undefined, callback), false)
 }
 
+function toKebab (s) {
+  let r = ''
+  let first = true
+  for (let c of s) {
+    r += (!first && c === c.toUpperCase() ? '-' : '') + c.toLowerCase()
+    if (first) first = false
+  }
+  return r
+}
+
+
 module.exports = {
+  toKebab,
   dnd,
   isDefined,
   func,

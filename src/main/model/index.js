@@ -20,18 +20,13 @@ class Rect extends Shape {
   constructor (attr) {
     super(assign({shape: 'rect'}, attr))
   }
-}
-
-class Circle extends Shape {
-  constructor (attr) {
-    super(assign({shape: 'circle'}, attr))
-  }
-  get r () { return this.width / 2 }
+  get rx () { return 0 }
+  get ry () { return 0 }
 }
 
 class Group extends Rect {
   constructor (compartment) {
-    super({ compartment, leaves: [], groups: [], rx: 8, ry: 8 })
+    super({ compartment, leaves: [], groups: [] })
   }
   get id () { return this.compartment.id }
   get label () { return this.compartment.id }
@@ -45,15 +40,19 @@ class Transform extends Rect {
   get id () { return this.reaction.id }
   get label () { return this.reaction.id }
   get className () { return `node reaction ${this.id}` }
+  get rx () { return 2 }
+  get ry () { return 2 }
 }
 
-class Pool extends Circle {
+class Pool extends Rect {
   constructor (species) {
     super({species, refs: []})
   }
   get id () { return this.species.id }
   get label () { return this.species.id }
   get className () { return `node pool ${this.id}` }
+  get rx () { return this.innerBounds.height() / 2 }
+  get ry () { return this.innerBounds.height() / 2 }
 }
 
 class Graph extends Entity {
@@ -82,7 +81,7 @@ class Model extends Entity {
     let i = g.nodeIndex = this.graph.groups.push(g) - 1
     if (c.outside) {
       c.outside = this.compartments.get(c.outside)
-      g.groups.push(i)
+      c.outside.group.groups.push(i)
     }
     return c
   }
@@ -112,27 +111,26 @@ class Model extends Entity {
   }
 
   get stoichiometricMatrix () {
-    const {species, reactions} = this
-    const n = species.length
-    const m = reactions.length
-    const s = ndarray(new Array(n * m), [n, m])
+    const species = this.species
+    const reactions = this.reactions
+    const n = this.species.size
+    const m = this.reactions.size
+    const s = ndarray(new Float64Array(n * m), [n, m])
 
     let i = 0
-    for (let spec of species) {
+    for (let spec of species.values()) {
       let j = 0
-      for (let react of reactions) {
-        for (let r of (react.listOfReactants || [])) {
-          console.log(react.id, 'reactant', r)
-          if (spec.id === r.species.id) {
-            s.set(i, j, r.stoichiometry)
+      for (let react of reactions.values()) {
+        let n = 0
+        for (let r of react.reactants) {
+          if (spec === r.species) { n = r.stoichiometry; break }
+        }
+        if (n === 0) {
+          for (let r of react.products) {
+            if (spec === r.species) { n = -r.stoichiometry; break }
           }
         }
-        for (let r of (react.listOfProducts || [])) {
-          console.log(react.id, 'product', r)
-          if (spec.id === r.species.id) {
-            s.set(i, j, -r.stoichiometry)
-          }
-        }
+        s.set(i, j, n)
         j++
       }
       i++
@@ -146,8 +144,19 @@ class Species extends Entity {
   get label () { return this.id }
 }
 
+class Compartment extends Entity {
+  get label () { return this.id }
+}
 
-class Compartment extends Entity { }
+class Link extends Entity {
+  constructor (source, target) { super({source, target}) }
+  get className () { return `link` }
+}
+
+class ModifierLink extends Link {
+  get className () { return 'link modifier' }
+ }
+
 class Unit extends Entity { }
 class Reaction extends Entity {
   constructor (attr) { super(assign({reversible: true, modifiers: [], reactants: [], products: []}, attr)) }
@@ -169,19 +178,19 @@ class Reaction extends Entity {
   addReactant (x) {
     let s = this._mkSpeciesRef(x)
     this.reactants.push(s)
-    this.model.graph.links.push({source: s.species.pool, target: this.transform})
+    this.model.graph.links.push(new Link(s.species.pool, this.transform))
     return s
   }
   addModifier (x) {
     let s = this._mkSpeciesRef(x)
     this.modifiers.push(s)
-    this.model.graph.links.push({source: s.species.pool, target: this.transform})
+    this.model.graph.links.push(new ModifierLink(s.species.pool, this.transform))
     return s
   }
   addProduct (x) {
     let s = this._mkSpeciesRef(x)
     this.products.push(s)
-    this.model.graph.links.push({target: s.species.pool, source: this.transform})
+    this.model.graph.links.push(new Link(this.transform, s.species.pool))
     return s
   }
 }
