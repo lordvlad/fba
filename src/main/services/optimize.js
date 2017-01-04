@@ -25,8 +25,6 @@ const {
   glp_set_obj_name
 } = require('glpk.js')
 
-module.exports = simplex
-
 function * seq (i, n) { while (i < n) yield i++ }
 
 const DBL_MAX = Number.MAX_VALUE
@@ -34,7 +32,7 @@ const defaults = {
   objective: { dir: 'max' }
 }
 
-function simplex (p) {
+module.exports.simplex = function simplex (p) {
   const {objective: {coef, dir}, lbs, ubs, constraints} = assign({}, defaults, p)
 
   let log = ''

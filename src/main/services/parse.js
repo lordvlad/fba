@@ -1,12 +1,15 @@
 const through = require('through2')
+const pipe = require('multipipe')
 const assign = require('object-assign')
 const omit = require('lodash/omit')
 const sax = require('sax')
 
-const { last, pop, push } = require('./util')
-const { Model } = require('./model')
+const { last, pop, push } = require('../util')
+const { Model } = require('../model')
 
-module.exports = { read, build, mkgraph }
+module.exports = function (opt) {
+  return pipe(read(opt), build(opt))
+}
 
 const getChild = (o, $name) => o.$children.find((x) => x.$name === $name) || {}
 const listOf = (o, what) => getChild(o, `listOf${what}`).$children || []

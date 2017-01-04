@@ -6,14 +6,13 @@ const { assign } = require('ndarray-ops')
 const show = require('ndarray-show')
 const fill = require('ndarray-fill')
 
-
 require('./styles/index.styl')
 
-const optimize = require('./simplex')
+const { optimize, parse } = require('./services')
+const { Model } = require('./model')
 const mainView = require('./views')
 const hotkeys = require('./hotkeys')
 const { dnd } = require('./util')
-const { read, build } = require('./parser')
 const search = require('./search')
 const filePicker = require('./file-picker')
 
@@ -33,7 +32,7 @@ app.model({
       return s
     },
     setModel (s, model) {
-      s.content.model = modelk
+      s.content.model = model
       return s
     },
     setSearchTerm (s, term) {
@@ -56,11 +55,14 @@ app.model({
       send('setSearchTerm', term, done)
       done()
     },
-    openFile (state, _, send, done) {
+    newModel (state, _, send, done) {
+      send('setModel', new Model(), done)
+    },
+    openModelFile (state, _, send, done) {
       filePicker({accept: 'xml'}, (files) => send('dropFiles', files, done))
     },
     dropFiles (state, files, send, done) {
-      frs(files[0]).pipe(read()).pipe(build()).on('data', (m) => send('setModel', m, done))
+      frs(files[0]).pipe(parse()).on('data', (m) => send('setModel', m, done))
     },
     blur (state, data, send, done) {
       document.activeElement.blur()
