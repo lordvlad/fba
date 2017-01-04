@@ -8,12 +8,11 @@ const fill = require('ndarray-fill')
 
 require('./styles/index.styl')
 
-const { optimize, parse } = require('./services')
+const { search, optimize, parse } = require('./services')
 const { Model } = require('./model')
 const mainView = require('./views')
 const hotkeys = require('./hotkeys')
 const { dnd } = require('./util')
-const search = require('./search')
 const filePicker = require('./file-picker')
 
 const noop = () => {}
