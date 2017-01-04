@@ -3,24 +3,37 @@ const assign = require('object-assign')
 const d3 = window.d3 = require('d3')
 
 const { get } = require('./util')
-const { Transform, Pool } = require('./classes')
 
 const margin = 6
-const pad = 6
 
 const makeEdgeBetween = cola.vpsc.makeEdgeBetween
-const makeRoute = (d) => (d.route = makeEdgeBetween(d.source.innerBounds, d.target.innerBounds, pad))
-const translateLabel = (d) => `translate(${d.textBounds.x},${d.textBounds.Y})`
+const makeRoute = (d) => {
+  assign(d, {route: makeEdgeBetween(d.source.innerBounds, d.target.innerBounds, margin)})
+}
+const translateLabel = (d) => `translate(${d.innerBounds.cx()},${d.y + margin - d.height / 2})`
 
 function setSize (d) {
   let b = this.getBBox()
-  assign(d, {width: b.width + 2 * (pad + margin), height: b.height + 2 * (pad + margin)})
+  assign(d, {width: b.width + 2 * margin + 8, height: b.height + 2 * margin + 8})
   d.innerBounds = d.bounds.inflate(-margin)
-  d.textBounds = d.innerBounds.inflate(-pad)
 }
 
+function insertLineBreaks (d) {
+  var el = d3.select(this)
+  var words = d.label.split(' ')
+  el.text('')
+
+  for (var i = 0; i < words.length; i++) {
+    el.append('tspan')
+      .text(words[i])
+      .attr('x', 0)
+      .attr('dy', '15')
+      .attr('font-size', '12')
+  }
+};
+
 module.exports = function draw (model, root) {
-  let {graph} = model
+  let { graph } = model
   let width = root.offsetWidth - 10
   let height = root.offsetHeight - 10
   let d3cola = cola.d3adaptor()
@@ -41,7 +54,6 @@ module.exports = function draw (model, root) {
     .attr('width', '100%')
     .attr('height', '100%')
 
-  // define arrow markers for graph links
 
   let vis = outer.append('g')
 
@@ -53,8 +65,10 @@ module.exports = function draw (model, root) {
   let nodesLayer = vis.append('g')
   let linksLayer = vis.append('g')
 
-  outer.append('svg:defs')
-    .append('svg:marker')
+  // define arrow markers for graph links
+  let defs = outer.append('svg:defs')
+
+  defs.append('svg:marker')
     .attr('id', 'end-arrow')
     .attr('viewBox', '0 -5 10 10')
     .attr('refX', 5)
@@ -66,12 +80,24 @@ module.exports = function draw (model, root) {
     .attr('stroke-width', '0px')
     .attr('fill', '#000')
 
+  defs.append('svg:marker')
+    .attr('id', 'end-circle')
+    .attr('viewBox', '-5 -5 10 10')
+    .attr('refX', 2)
+    .attr('markerWidth', 3)
+    .attr('markerHeight', 3)
+    .attr('orient', 'auto')
+    .append('svg:circle')
+    .attr('r', 5).attr('cy', 0).attr('cx', 0)
+    .attr('stroke-width', '0px')
+    .attr('fill', '#000')
+
   d3cola
     .nodes(graph.nodes)
     .links(graph.links)
     .groups(graph.groups)
     .constraints(graph.constraints)
-    .start()
+    .start(10, 10, 10)
 
   let group = groupsLayer
     .selectAll('.group')
@@ -87,54 +113,31 @@ module.exports = function draw (model, root) {
     .data(graph.links)
     .enter()
     .append('line')
-    .attr('class', 'link')
+    .attr('class', get('className'))
 
-  let reactionNode = nodesLayer
-    .selectAll('.node.reaction')
-    .data(graph.nodes.filter((n) => n instanceof Transform))
+  let node = nodesLayer
+    .selectAll('.node')
+    .data(graph.nodes)
     .enter()
     .append('rect')
     .attr('class', get('className'))
     .call(d3cola.drag)
 
-  let entityNode = nodesLayer
-    .selectAll('.node.pool')
-    .data(graph.nodes.filter((n) => n instanceof Pool))
-    .enter()
-    .append('circle')
-    .attr('class', get('className'))
-    .call(d3cola.drag)
-
-  nodesLayer.selectAll('.node').append('title').text(get('label'))
+  node.append('title').text(get('label'))
 
   let label = nodesLayer
     .selectAll('.label')
     .data(graph.nodes)
     .enter()
     .append('text')
-    .text((d) => get('label')(d).substr(0, 5))
     .attr('class', 'label')
     .call(d3cola.drag)
 
-  label.append('title').text(get('label'))
+  label.each(insertLineBreaks)
 
   const tick = function () {
     label.each(setSize)
-
-    label
-      .attr('transform', translateLabel)
-
-    reactionNode
-      .attr('x', get('innerBounds.x'))
-      .attr('y', get('innerBounds.y'))
-      .attr('width', get('innerBounds.width'))
-      .attr('height', 2 * (pad + margin) + 12)
-      // .attr('height', get('innerBounds.height'))
-
-    entityNode
-      .attr('cx', get('innerBounds.cx'))
-      .attr('cy', get('innerBounds.cy'))
-      .attr('r', (d) => d.innerBounds.height() / 2)
+    label.attr('transform', translateLabel)
 
     link
       .each(makeRoute)
@@ -142,6 +145,14 @@ module.exports = function draw (model, root) {
       .attr('y1', get('route.sourceIntersection.y'))
       .attr('x2', get('route.arrowStart.x'))
       .attr('y2', get('route.arrowStart.y'))
+
+    node
+      .attr('rx', get('rx'))
+      .attr('ry', get('rx'))
+      .attr('x', get('innerBounds.x'))
+      .attr('y', get('innerBounds.y'))
+      .attr('width', get('innerBounds.width'))
+      .attr('height', get('innerBounds.height'))
 
     group
       .attr('x', get('bounds.x'))

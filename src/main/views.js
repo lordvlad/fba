@@ -1,39 +1,68 @@
+/* global alert */
 const html = require('choo/html')
 const draw = require('./draw')
 
 module.exports = mainView
 
-function networkView (state, prev, send) {
-  return html`todo`
-}
+const notImpl = () => alert('not implemented')
+const noop = () => {}
+const li = (title, icon = 'angle-right', onclick = notImpl) => html`
+  <li class=vclNavigationItem role=presentation aria-selected=false>
+    <a class=vclNavigationItemLabel title=${title} href="#"
+        onclick=${onclick}>
+      <i class="vclIcon fa fa-fw fa-${icon}"></i>
+      ${title}
+    </a>
+  </li>
+`
 
-function calcView (state, prev, send) {
-  const fba = () => send('runFBA', null, () => {})
+
+function networkView (state, prev, send) {
   return html`
     <div>
       <nav class="vclNavigation vclLayoutVertical vclLayoutFlex vclVertical">
         <ul>
-        <li class="vclNavigationItem">
-          <a class=vclNavigationItemLabel title=fba href=# onclick=${fba}>
-            fba 
-          </a>
-        </li>
+          ${li('todo')}
         </ul>
       </nav>
     </div>
     `
 }
 
-function settingsView (state, prev, send) {
+function calcView (state, prev, send) {
+  const run = (what) => () => send(`run${what[0].toUpperCase()}${what.substring(1)}`, null, noop)
   return html`
     <div>
       <nav class="vclNavigation vclLayoutVertical vclLayoutFlex vclVertical">
         <ul>
-        <li class="vclNavigationItem">
-          <a class=vclNavigationItemLabel title=search href="#">
-            todo 
-          </a>
-        </li>
+          ${li('fba', undefined, run('FBA'))}
+          ${li('dynamic simulation', undefined, run('sim'))}
+        </ul>
+      </nav>
+    </div>
+    `
+}
+
+function optionsView (state, prev, send) {
+  return html`
+    <div>
+      <nav class="vclNavigation vclLayoutVertical vclLayoutFlex vclVertical">
+        <ul>
+          ${li('todo')}
+        </ul>
+      </nav>
+    </div>
+    `
+}
+
+function fileView (state, prev, send) {
+  return html`
+    <div>
+      <nav class="vclNavigation vclLayoutVertical vclLayoutFlex vclVertical">
+        <ul>
+          ${li('open sbml', 'folder-open-o', () => send('openFile'))}
+          ${li('export sbml', 'save')}
+          ${li('search biomodels', 'search')}
         </ul>
       </nav>
     </div>
@@ -105,8 +134,8 @@ function menuView (state, prev, send) {
   const select = (what) => () => send('activeMenu', what)
   const li = (title, icon) => html`
     <li class="vclNavigationItem ${selected(title)}"
-        role=presentation aria-selected=false>
-      <a class=vclNavigationItemLabel title=${title} href="#"
+        role=presentation aria-selected=${state.active === title}>
+      <a class=vclNavigationItemLabel title=${title} href=#
           onclick=${select(title)}>
         <i class="vclIcon fa fa-fw fa-${icon}"></i>
       </a>
@@ -122,10 +151,11 @@ function menuView (state, prev, send) {
   }
 
   const tab = ({
+    file: () => wrap(fileView(state.file, prev && state.file, send)), 
     search: () => wrap(searchView(state.search, prev && prev.search, send)),
     network: () => wrap(networkView(state.network, prev && prev.network, send)),
     calculate: () => wrap(calcView(state.clac, prev && state.calc, send)),
-    settings: () => wrap(settingsView(state.settings, prev && prev.settings, send)),
+    options: () => wrap(optionsView(state.options, prev && prev.options, send)),
     [null]: () => ''
   })[state.active]()
 
@@ -134,10 +164,11 @@ function menuView (state, prev, send) {
       <div class="vclLayoutVertical sidebar">
         <nav class="vclNavigation vclLayoutVertical vclLayoutFlex vclVertical">
           <ul>
+            ${li('file', 'file-o')}
             ${li('search', 'search')}
             ${li('network', 'code-fork')}
             ${li('calculate', 'calculator')}
-            ${li('settings', 'wrench')}
+            ${li('options', 'wrench')}
           </ul>
         </nav>
       </div>

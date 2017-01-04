@@ -1,9 +1,10 @@
 const through = require('through2')
 const assign = require('object-assign')
-const sax = require('sax')
-const { last, pop, push } = require('./util')
-const { Model } = require('./classes')
 const omit = require('lodash/omit')
+const sax = require('sax')
+
+const { last, pop, push } = require('./util')
+const { Model } = require('./model')
 
 module.exports = { read, build, mkgraph }
 
