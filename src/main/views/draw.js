@@ -2,7 +2,18 @@ const cola = require('webcola')
 const assign = require('object-assign')
 const d3 = window.d3 = require('d3')
 
-const { get } = require('./util')
+const { get } = require('../util')
+
+const either = (cond, defaul, ...arr) => (d) => {
+  for (let a of arr) {
+    let v = a.call ? a(d) : a
+    if (cond(v)) return v
+  }
+  return defaul
+}
+
+const le0 = (x) => x >= 0
+const getle0 = (...args) => either(le0, 0, get(...args))
 
 const margin = 6
 
@@ -147,18 +158,18 @@ module.exports = function draw (model, root) {
       .attr('y2', get('route.arrowStart.y'))
 
     node
-      .attr('rx', get('rx'))
-      .attr('ry', get('rx'))
+      .attr('rx', getle0('rx'))
+      .attr('ry', getle0('rx'))
       .attr('x', get('innerBounds.x'))
       .attr('y', get('innerBounds.y'))
-      .attr('width', get('innerBounds.width'))
-      .attr('height', get('innerBounds.height'))
+      .attr('width', getle0('innerBounds.width'))
+      .attr('height', getle0('innerBounds.height'))
 
     group
       .attr('x', get('bounds.x'))
       .attr('y', get('bounds.y'))
-      .attr('width', get('bounds.width'))
-      .attr('height', get('bounds.height'))
+      .attr('width', getle0('bounds.width'))
+      .attr('height', getle0('bounds.height'))
   }
 
   d3cola.on('tick', tick)
