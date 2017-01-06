@@ -1,6 +1,8 @@
 const assign = require('object-assign')
 const ndarray = require('ndarray')
 
+const clonable = ['ATP', 'ADP', 'NAD', 'NADH', 'NADP', 'NADPH']
+
 class Clazz {
   constructor (attr) {
     assign(this, attr, { $constructor: this.constructor.name })
@@ -34,9 +36,7 @@ class Group extends Rect {
 }
 
 class Transform extends Rect {
-  constructor (reaction) {
-    super({ reaction, leaves: [], groups: [] })
-  }
+  constructor (reaction) { super({ reaction, leaves: [], groups: [] }) }
   get id () { return this.reaction.id }
   get label () { return this.reaction.id }
   get className () { return `node reaction ${this.id}` }
@@ -44,13 +44,22 @@ class Transform extends Rect {
   get ry () { return 2 }
 }
 
-class Pool extends Rect {
-  constructor (species) {
-    super({species, refs: []})
+class Pool extends Entity {
+  constructor (species) { super({species, refs: [], clones: []}) }
+  addClone () { let c = new PoolClone(this); this.clones.push(c); return c }
+  getClone () {
+    if (clonable.indexOf(this.id) !== -1) return this.addClone()
+    if (this.clones.length < 1) return this.addClone()
+    return this.clones[0]
   }
   get id () { return this.species.id }
-  get label () { return this.species.id }
-  get className () { return `node pool ${this.id}` }
+}
+
+class PoolClone extends Rect {
+  constructor (pool) { super({pool}) }
+  get id () { return this.pool.species.id }
+  get label () { return this.pool.species.id }
+  get className () { return `node pool ${this.id} ${this.pool.clones.length > 1 ? 'clone' : ''}` }
   get rx () { return this.innerBounds.height() / 2 }
   get ry () { return this.innerBounds.height() / 2 }
 }
@@ -94,8 +103,8 @@ class Model extends Entity {
 
     this.species.set(s.id, s)
     s.compartment = this.compartments.get(s.compartment)
-    let i = p.nodeIndex = this.graph.nodes.push(p) - 1
-    s.compartment.group.leaves.push(i)
+    // let i = p.nodeIndex = this.graph.nodes.push(p) - 1
+    // s.compartment.group.leaves.push(i)
     return s
   }
 
@@ -155,7 +164,7 @@ class Link extends Entity {
 
 class ModifierLink extends Link {
   get className () { return 'link modifier' }
- }
+}
 
 class Unit extends Entity { }
 class Reaction extends Entity {
@@ -168,6 +177,7 @@ class Reaction extends Entity {
     this._compartment = c
     c.group.leaves.push(this.transform.nodeIndex)
   }
+
   _mkSpeciesRef (x) {
     let s = new SpeciesReference(x)
     s.species = this.model.species.get(s.species)
@@ -175,29 +185,45 @@ class Reaction extends Entity {
     if (!this.compartment) this.compartment = s.species.compartment
     return s
   }
-  addReactant (x) {
-    let s = this._mkSpeciesRef(x)
-    this.reactants.push(s)
-    this.model.graph.links.push(new Link(s.species.pool, this.transform, this.reversible))
-    return s
+
+  _getClone (s) {
+    let c = s.species.pool.getClone()
+    if (this.model.graph.nodes.indexOf(c) === -1) {
+      c.nodeIndex = this.model.graph.nodes.push(c) - 1
+      this.compartment.group.leaves.push(c.nodeIndex)
+    }
+    return c
   }
+
   addModifier (x) {
     let s = this._mkSpeciesRef(x)
+    let c = this._getClone(s)
     this.modifiers.push(s)
-    this.model.graph.links.push(new ModifierLink(s.species.pool, this.transform))
+    this.model.graph.links.push(new ModifierLink(c, this.transform))
     return s
   }
+
+  addReactant (x) {
+    let s = this._mkSpeciesRef(x)
+    let c = this._getClone(s)
+    this.reactants.push(s)
+    this.model.graph.links.push(new Link(c, this.transform, this.reversible))
+    return s
+  }
+
   addProduct (x) {
     let s = this._mkSpeciesRef(x)
+    let c = this._getClone(s)
     this.products.push(s)
-    this.model.graph.links.push(new Link(this.transform, s.species.pool, this.reversible))
+    this.model.graph.links.push(new Link(this.transform, c, this.reversible))
     return s
   }
 }
+
 class SpeciesReference extends Entity {
   constructor (attr) { super(assign({stoichiometry: 1}, attr)) }
-  get label () { return this.species.label }
 }
+
 class ModifierSpeciesReference extends SpeciesReference {}
 
 const create = (attributes) => {

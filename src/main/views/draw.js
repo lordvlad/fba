@@ -61,7 +61,7 @@ module.exports = function draw (model, root) {
   let width = root.offsetWidth - 10
   let height = root.offsetHeight - 10
   let d3cola = cola.d3adaptor()
-    .linkDistance(60)
+    .linkDistance(30)
     .avoidOverlaps(true)
     .size([width, height])
 
@@ -81,9 +81,9 @@ module.exports = function draw (model, root) {
 
   let vis = outer.append('g')
 
-  // vis.call(d3.behavior.zoom().scaleExtent([0.1, 10]).on('zoom', function () {
-  //   vis.attr('transform', `translate(${d3.event.translate}) scale(${d3.event.scale})`)
-  // }))
+  outer.call(d3.behavior.zoom().scaleExtent([0.1, 10]).on('zoom', function () {
+    vis.attr('transform', `translate(${d3.event.translate}) scale(${d3.event.scale})`)
+  }))
 
   let groupsLayer = vis.append('g')
   let nodesLayer = vis.append('g')
@@ -121,7 +121,7 @@ module.exports = function draw (model, root) {
     .links(graph.links)
     .groups(graph.groups)
     .constraints(graph.constraints)
-    .start(10, 10, 10)
+    .start(20, 10, 10)
 
   let group = groupsLayer
     .selectAll('.group')
