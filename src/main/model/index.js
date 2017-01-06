@@ -149,8 +149,8 @@ class Compartment extends Entity {
 }
 
 class Link extends Entity {
-  constructor (source, target) { super({source, target}) }
-  get className () { return `link` }
+  constructor (source, target, reversible = true) { super({source, target, reversible}) }
+  get className () { return 'link' + (this.reversible ? ' reversible' : '') }
 }
 
 class ModifierLink extends Link {
@@ -178,7 +178,7 @@ class Reaction extends Entity {
   addReactant (x) {
     let s = this._mkSpeciesRef(x)
     this.reactants.push(s)
-    this.model.graph.links.push(new Link(s.species.pool, this.transform))
+    this.model.graph.links.push(new Link(s.species.pool, this.transform, this.reversible))
     return s
   }
   addModifier (x) {
@@ -190,7 +190,7 @@ class Reaction extends Entity {
   addProduct (x) {
     let s = this._mkSpeciesRef(x)
     this.products.push(s)
-    this.model.graph.links.push(new Link(this.transform, s.species.pool))
+    this.model.graph.links.push(new Link(this.transform, s.species.pool, this.reversible))
     return s
   }
 }

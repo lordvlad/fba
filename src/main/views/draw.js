@@ -17,7 +17,20 @@ const getle0 = (...args) => either(le0, 0, get(...args))
 
 const margin = 6
 
-const makeEdgeBetween = cola.vpsc.makeEdgeBetween
+function makeEdgeBetween (source, target, ah) {
+  let si = source.rayIntersection(target.cx(), target.cy()) || { x: source.cx(), y: source.cy() }
+  let ti = target.rayIntersection(source.cx(), source.cy()) || { x: target.cx(), y: target.cy() }
+  let dx = ti.x - si.x
+  let dy = ti.y - si.y
+  let l = Math.sqrt(dx * dx + dy * dy)
+  let al = l - ah
+  return {
+    sourceIntersection: si,
+    targetIntersection: ti,
+    arrowStart: { x: si.x + al * dx / l, y: si.y + al * dy / l },
+    arrowEnd: { x: ti.x - al * dx / l, y: ti.y - al * dy / l }
+  }
+}
 const makeRoute = (d) => {
   assign(d, {route: makeEdgeBetween(d.source.innerBounds, d.target.innerBounds, margin)})
 }
@@ -85,7 +98,7 @@ module.exports = function draw (model, root) {
     .attr('refX', 5)
     .attr('markerWidth', 3)
     .attr('markerHeight', 3)
-    .attr('orient', 'auto')
+    .attr('orient', 'auto-start-reverse')
     .append('svg:path')
     .attr('d', 'M0,-5L10,0L0,5L2,0')
     .attr('stroke-width', '0px')
@@ -152,8 +165,8 @@ module.exports = function draw (model, root) {
 
     link
       .each(makeRoute)
-      .attr('x1', get('route.sourceIntersection.x'))
-      .attr('y1', get('route.sourceIntersection.y'))
+      .attr('x1', get('route.arrowEnd.x'))
+      .attr('y1', get('route.arrowEnd.y'))
       .attr('x2', get('route.arrowStart.x'))
       .attr('y2', get('route.arrowStart.y'))
 
