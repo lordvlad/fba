@@ -49,6 +49,7 @@
     "ndarray-ops": "^1.2.2",
     "ndarray-optimization": "tab58/ndarray-optimization",
     "ndarray-show": "^2.0.0",
+    "nprogress": "^0.2.0",
     "object-assign": "^4.1.0",
     "sax": "^1.2.1",
     "setprototypeof": "^1.0.2",
