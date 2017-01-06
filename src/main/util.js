@@ -91,8 +91,16 @@ function toKebab (s) {
   return r
 }
 
+function defer () {
+  let res
+  let rej
+  let p = new Promise(function (resolve, reject) { res = resolve; rej = reject })
+  return { promise: p, resolve: res, reject: rej }
+}
+
 
 module.exports = {
+  defer,
   toKebab,
   dnd,
   isDefined,
