@@ -101,6 +101,7 @@ function defer () {
 
 module.exports = {
   defer,
+  noop: () => {},
   toKebab,
   dnd,
   isDefined,
