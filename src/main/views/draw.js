@@ -15,7 +15,7 @@ const either = (cond, defaul, ...arr) => (d) => {
 const le0 = (x) => x >= 0
 const getle0 = (...args) => either(le0, 0, get(...args))
 
-const margin = 6
+const margin = 10
 
 function makeEdgeBetween (source, target, ah) {
   let si = source.rayIntersection(target.cx(), target.cy()) || { x: source.cx(), y: source.cy() }
@@ -32,7 +32,7 @@ function makeEdgeBetween (source, target, ah) {
   }
 }
 const makeRoute = (d) => {
-  assign(d, {route: makeEdgeBetween(d.source.innerBounds, d.target.innerBounds, margin)})
+  assign(d, {route: makeEdgeBetween(d.source.innerBounds, d.target.innerBounds, 6)})
 }
 const translateLabel = (d) => `translate(${d.innerBounds.cx()},${d.y + margin - d.height / 2})`
 
@@ -61,7 +61,7 @@ module.exports = function draw (model, root) {
   let width = root.offsetWidth - 10
   let height = root.offsetHeight - 10
   let d3cola = cola.d3adaptor()
-    .linkDistance(30)
+    .linkDistance(40)
     .avoidOverlaps(true)
     .size([width, height])
 
@@ -82,6 +82,7 @@ module.exports = function draw (model, root) {
   let vis = outer.append('g')
 
   outer.call(d3.behavior.zoom().scaleExtent([0.1, 10]).on('zoom', function () {
+    if (!graph.panMode) return
     vis.attr('transform', `translate(${d3.event.translate}) scale(${d3.event.scale})`)
   }))
 
