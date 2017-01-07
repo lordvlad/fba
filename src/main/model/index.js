@@ -1,7 +1,7 @@
 const assign = require('object-assign')
 const ndarray = require('ndarray')
 
-const clonable = ['ATP', 'ADP', 'NAD', 'NADH', 'NADP', 'NADPH']
+const clonable = ['ATP', 'ADP', 'NAD', 'NADH', 'NADP', 'NADPH', 'P', 'O2', 'H2O']
 
 class Clazz {
   constructor (attr) {
