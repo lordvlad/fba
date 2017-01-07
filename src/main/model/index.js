@@ -33,6 +33,8 @@ class Group extends Rect {
   get id () { return this.compartment.id }
   get label () { return this.compartment.id }
   get className () { return `group compartment ${this.id}` }
+  get rx () { return 8 }
+  get ry () { return 8 }
 }
 
 class Transform extends Rect {

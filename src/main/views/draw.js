@@ -77,14 +77,11 @@ module.exports = function draw (model, root) {
     .attr('class', 'background')
     .attr('width', '100%')
     .attr('height', '100%')
-
+    .call(d3.behavior.zoom().scaleExtent([0.1, 10]).on('zoom', function () {
+      vis.attr('transform', `translate(${d3.event.translate}) scale(${d3.event.scale})`)
+    }))
 
   let vis = outer.append('g')
-
-  outer.call(d3.behavior.zoom().scaleExtent([0.1, 10]).on('zoom', function () {
-    if (!graph.panMode) return
-    vis.attr('transform', `translate(${d3.event.translate}) scale(${d3.event.scale})`)
-  }))
 
   let groupsLayer = vis.append('g')
   let nodesLayer = vis.append('g')
@@ -124,21 +121,22 @@ module.exports = function draw (model, root) {
     .constraints(graph.constraints)
     .start(20, 10, 10)
 
-  let group = groupsLayer
-    .selectAll('.group')
-    .data(graph.groups)
-    .enter()
-    .append('rect')
-    .attr('class', (d) => `group compartment ${d.id}`)
-    .attr('rx', 8)
-    .attr('ry', 8)
-
   let link = linksLayer
     .selectAll('.link')
     .data(graph.links)
     .enter()
     .append('line')
     .attr('class', get('className'))
+
+  let group = groupsLayer
+    .selectAll('.group')
+    .data(graph.groups)
+    .enter()
+    .append('rect')
+    .attr('class', get('className'))
+    .attr('rx', get('rx'))
+    .attr('ry', get('ry'))
+    .call(d3cola.drag)
 
   let node = nodesLayer
     .selectAll('.node')
@@ -160,7 +158,7 @@ module.exports = function draw (model, root) {
 
   label.each(insertLineBreaks)
 
-  const tick = function () {
+  function tick () {
     label.each(setSize)
     label.attr('transform', translateLabel)
 
@@ -189,4 +187,3 @@ module.exports = function draw (model, root) {
   d3cola.on('tick', tick)
   return root
 }
-
