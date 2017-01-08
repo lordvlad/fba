@@ -3,9 +3,10 @@ const html = require('choo/html')
 
 const notImpl = () => alert('not implemented')
 const noop = () => {}
-const li = (title, icon = 'angle-right', onclick = notImpl) => html`
-  <li class=vclNavigationItem role=presentation aria-selected=false>
-    <a class=vclNavigationItemLabel title=${title} href="#"
+const li = (title, icon = 'angle-right', onclick = notImpl, selected = false) => html`
+  <li class="vclNavigationItem ${selected ? 'vclSelected' : ''}"
+      role=presentation aria-selected=${selected}>
+    <a class=vclNavigationItemLabel title=${title} href=#
         onclick=${onclick}>
       <i class="vclIcon fa fa-fw fa-${icon}"></i>
       ${title}
