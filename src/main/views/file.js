@@ -8,10 +8,8 @@ module.exports = function fileView (state, prev, send) {
         <ul>
           ${li('new model', 'file-o', () => send('newModel'))}
           ${li('open sbml', 'folder-open-o', () => send('openModelFile'))}
-          ${li('export sbml', 'save')}
-          ${li('search biomodels', 'search')}
         </ul>
       </nav>
     </div>
-    `
+  `
 }
