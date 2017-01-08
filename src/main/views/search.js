@@ -16,7 +16,7 @@ let empty = html`
   </li>
 `
 
-let result = ({id, names, reaction, href}) => html`
+let result = ({id, name, names, reaction, href}) => reaction ? html`
   <li class=vclNavigationItem>
     <a class=vclNavigationItemLabel title=${names} href=${href}>
       <small>${id}</small>
@@ -24,9 +24,17 @@ let result = ({id, names, reaction, href}) => html`
       <small>${reaction}</small>
     </a>
   </li>
+` : html`
+  <li class=vclNavigationItem>
+    <a class=vclNavigationItemLabel title=${name} href=${href}>
+      <small>${id}</small>
+      <b>${names}</b>
+      <small>${reaction}</small>
+    </a>
+  </li>
 `
 
-module.exports = function searchView (state, prev, send) {
+module.exports = function searchView (state, _, send) {
   let { busy, term, results } = state
   if (!term) term = ''
   let setterm = (e) => send('searchFor', e ? e.target.value : '')
