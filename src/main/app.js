@@ -14,14 +14,13 @@ const app = module.exports = choo()
 app.router(['/', mainView])
 app.model({
   state: {
-    menu: { active: null, search: {term: '', busy: false, results: []} },
+    menu: {
+      active: null,
+      search: {searchId: 'search', term: '', busy: false, results: []}
+    },
     content: {}
   },
   reducers: {
-    setPanMode (s, panMode) {
-      if (s.content.model) s.content.model.graph.panMode = panMode
-      return s
-    },
     activeMenu (s, active) {
       s.menu.active = active === s.menu.active ? null : active
       return s
