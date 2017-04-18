@@ -15,11 +15,11 @@ function wrap (tab) {
   `
 }
 
-module.exports = function menuView (appstate, prev, send) {
+module.exports = function menuView (appstate, emit) {
   const state = appstate.menu
   const selected = (title) => state.active === title ? 'vclSelected' : ''
   const disabled = (t) => t ? 'vclDisabled' : ''
-  const select = (what) => () => send('activeMenu', what)
+  const select = (what) => () => emit('activeMenu', what)
   const li = (title, icon, dis = false) => html`
     <li class="vclNavigationItem ${disabled(dis)} ${selected(title)}"
         role=presentation href=# aria-selected=${state.active === title}>
@@ -31,11 +31,11 @@ module.exports = function menuView (appstate, prev, send) {
   `
 
   const tab = ({
-    file: () => wrap(fileView(state.file, prev && state.file, send)),
-    search: () => wrap(searchView(state.search, prev && prev.search, send)),
-    network: () => wrap(networkView(state.network, prev && prev.network, send)),
-    calculate: () => wrap(calcView(state.clac, prev && state.calc, send)),
-    options: () => wrap(optionsView(state.options, prev && prev.options, send)),
+    file: () => wrap(fileView(state.file, emit)),
+    search: () => wrap(searchView(state.search, emit)),
+    network: () => wrap(networkView(state.network, emit)),
+    calculate: () => wrap(calcView(state.clac, emit)),
+    options: () => wrap(optionsView(state.options, emit)),
     [null]: () => ''
   })[state.active]()
 

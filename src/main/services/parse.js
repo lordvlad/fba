@@ -7,8 +7,13 @@ const sax = require('sax')
 const { last, pop, push } = require('../util')
 const { Model } = require('../model')
 
-module.exports = function (opt) {
-  return pipe(read(opt), build(opt))
+module.exports = function (self) {
+  let p = pipe(read(), build())
+
+  self.addEventListener('message', ({data}) => {
+    if (data.data) p.write(data.data)
+  })
+  p.on('data', (d) => self.postMessage(d))
 }
 
 const getChild = (o, $name) => o.$children.find((x) => x.$name === $name) || {}
@@ -37,7 +42,7 @@ function build (opt = {}) {
 function read (opt = {strict: true}) {
   const mkparser = () => sax.createStream(opt.strict, opt)
   const stack = [{}]
-  const write = (d, _, c) => parser.write(d) && c()
+  const write = (d, _, c) => parser.write(Buffer.from(d)) && c()
   const dup = through.obj(write)
 
   let parser = mkparser()

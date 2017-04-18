@@ -1,6 +1,6 @@
 const html = require('choo/html')
 
-let loading = html`
+const loading = html`
   <li class="vclDisabled vclNavigationItem">
     <a class=vclNavigationItemLabel href=#>
       loading ...
@@ -8,7 +8,7 @@ let loading = html`
   </li>
 `
 
-let empty = html`
+const empty = html`
   <li class="vclDisabled vclNavigationItem">
     <a class=vclNavigationItemLabel href=#>
       no results  
@@ -16,31 +16,39 @@ let empty = html`
   </li>
 `
 
-let result = ({id, name, names, reaction, href}) => reaction ? html`
-  <li class=vclNavigationItem>
-    <a class=vclNavigationItemLabel title=${names} href=${href}>
-      <small>${id}</small>
-      <b>${names}</b>
-      <small>${reaction}</small>
-    </a>
-  </li>
-` : html`
-  <li class=vclNavigationItem>
-    <a class=vclNavigationItemLabel title=${name} href=${href}>
-      <small>${id}</small>
-      <b>${names}</b>
-      <small>${reaction}</small>
-    </a>
-  </li>
-`
 
-module.exports = function searchView (state, _, send) {
+module.exports = function searchView (state, emit) {
   let { busy, term, results } = state
   if (!term) term = ''
-  let setterm = (e) => send('searchFor', e ? e.target.value : '')
-  let clear = () => setterm()
-  let hideEraser = term ? '' : 'vclDisplayNone'
-  let hideSpinner = busy ? '' : 'vclDisplayNone'
+  if (results && results.length === 0) results = false
+  const setterm = (e) => emit('searchFor', e ? e.target.value : '')
+  const clear = () => setterm()
+  const hideEraser = term ? '' : 'vclDisplayNone'
+  const hideSpinner = busy ? '' : 'vclDisplayNone'
+
+  const result = (r) => {
+    const {id, name, names, reaction, href} = r
+    if (reaction) {
+      return html`
+        <li class=vclNavigationItem>
+          <a class=vclNavigationItemLabel title=${names} href=${href}>
+            <small>${id}</small>
+            <b>${names}</b>
+            <small>${reaction}</small>
+          </a>
+        </li>
+      `
+    }
+    return html`
+      <li class=vclNavigationItem>
+        <a class=vclNavigationItemLabel title=${name} href=${href}>
+          <small>${id}</small>
+          <b>${names}</b>
+          <small>${reaction}</small>
+        </a>
+      </li>
+    `
+  }
 
   return html`
     <div>

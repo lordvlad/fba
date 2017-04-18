@@ -3,6 +3,38 @@ const ndarray = require('ndarray')
 
 const clonable = ['ATP', 'ADP', 'NAD', 'NADH', 'NADP', 'NADPH', 'P', 'O2', 'H2O']
 
+const cons = ({}).constructor
+
+const isObj = (o) => o !== null && typeof o === 'object'
+const isArr = (o) => o !== null && Array.isArray(o)
+
+const entries = (o) => o instanceof Map ? o.entries() : Object.entries(o)
+
+function revive (o) {
+  const m = new WeakMap()
+  const set = (k, v) => { m.set(k, v); return v }
+  function rev (o) {
+    const x = m.get(o)
+    if (x) return x
+    if (isArr(o)) return set(o, o.map(rev))
+    if (isObj(o)) {
+      if (o.$constructor && o.constructor === cons) {
+        const v = Object.create(module.exports[o.$constructor].prototype)
+        set(o, v)
+        for (let [k, v] of entries(o)) o[k] = rev(v)
+        assign(v, o)
+        return v
+      } else {
+        for (let [k, v] of entries(o)) o[k] = rev(v)
+        set(o, o)
+        return o
+      }
+    }
+    return o
+  }
+  return rev(o)
+}
+
 class Clazz {
   constructor (attr) {
     assign(this, attr, { $constructor: this.constructor.name })
@@ -171,6 +203,7 @@ class ModifierLink extends Link {
 class Unit extends Entity { }
 class Reaction extends Entity {
   constructor (attr) { super(assign({reversible: true, modifiers: [], reactants: [], products: []}, attr)) }
+  get label () { return this.name }
   get compartment () { return this._compartment }
   set compartment (c) {
     if (this._compartment) {
@@ -243,6 +276,9 @@ const create = (attributes) => {
 
 module.exports = {
   Pool,
+  PoolClone,
+  Link,
+  ModifierLink,
   Transform,
   Model,
   Species,
@@ -252,5 +288,7 @@ module.exports = {
   SpeciesReference,
   ModifierSpeciesReference,
   Group,
-  create
+  Graph,
+  create,
+  revive
 }

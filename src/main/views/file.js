@@ -1,7 +1,7 @@
 const html = require('choo/html')
 const { li } = require('./util')
 
-module.exports = function fileView (state, prev, send) {
+module.exports = function fileView (state, send) {
   return html`
     <div>
       <nav class="vclNavigation vclLayoutVertical vclLayoutFlex vclVertical">

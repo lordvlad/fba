@@ -11,7 +11,6 @@ const either = (cond, defaul, ...arr) => (d) => {
   }
   return defaul
 }
-
 const le0 = (x) => x >= 0
 const getle0 = (...args) => either(le0, 0, get(...args))
 
@@ -31,9 +30,11 @@ function makeEdgeBetween (source, target, ah) {
     arrowEnd: { x: ti.x - al * dx / l, y: ti.y - al * dy / l }
   }
 }
+
 const makeRoute = (d) => {
   assign(d, {route: makeEdgeBetween(d.source.innerBounds, d.target.innerBounds, 6)})
 }
+
 const translateLabel = (d) => `translate(${d.innerBounds.cx()},${d.y + margin - d.height / 2})`
 
 function setSize (d) {
@@ -77,9 +78,10 @@ module.exports = function draw (model, root) {
     .attr('class', 'background')
     .attr('width', '100%')
     .attr('height', '100%')
-    .call(d3.behavior.zoom().scaleExtent([0.1, 10]).on('zoom', function () {
-      vis.attr('transform', `translate(${d3.event.translate}) scale(${d3.event.scale})`)
-    }))
+    .call(d3.behavior
+      .zoom()
+      .scaleExtent([0.1, 10])
+      .on('zoom', () => vis.attr('transform', `translate(${d3.event.translate}) scale(${d3.event.scale})`)))
 
   let vis = outer.append('g')
 
@@ -119,7 +121,9 @@ module.exports = function draw (model, root) {
     .links(graph.links)
     .groups(graph.groups)
     .constraints(graph.constraints)
-    .start(20, 10, 10)
+    // .start(20, 10, 10)
+    .start(20)
+
 
   let link = linksLayer
     .selectAll('.link')
@@ -136,7 +140,7 @@ module.exports = function draw (model, root) {
     .attr('class', get('className'))
     .attr('rx', get('rx'))
     .attr('ry', get('ry'))
-    .call(d3cola.drag)
+    // .call(d3cola.drag)
 
   let node = nodesLayer
     .selectAll('.node')
@@ -154,7 +158,7 @@ module.exports = function draw (model, root) {
     .enter()
     .append('text')
     .attr('class', 'label')
-    .call(d3cola.drag)
+    // .call(d3cola.drag)
 
   label.each(insertLineBreaks)
 

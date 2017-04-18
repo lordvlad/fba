@@ -1,55 +1,29 @@
-/* global URL */
 const work = require('webworkify')
-const np = require('nprogress')
-
-const { defer } = require('../util')
+const { Observable, Subject } = require('rx-lite')
 
 const services = {
-  fba: require('./fba.js'),
-  biomodels: require('./biomodels.js')
+  fba: require('./fba'),
+  search: require('./search'),
+  parse: require('./parse'),
+  kegg: require('./kegg')
 }
-const workers = {}
 
-module.exports.search = require('./search')
-module.exports.parse = require('./parse')
-module.exports.fba = service('fba')
-module.exports.biomodels = window.biomodels = service('biomodels')
+for (let k in services) module.exports[k] = service(k)
 
 function service (name) {
-  return function (opt) {
-    np.start()
-    if (!workers[name]) workers[name] = work(services[name])
-    const srv = workers[name]
-    const { promise, resolve, reject } = defer()
-    const clean = () => {
-      srv.removeEventListener('message', onMessage)
-      srv.removeEventListener('message', onError)
-      URL.revokeObjectURL(srv.objectURL)
-      np.done()
-    }
+  const srv = work(services[name])
 
-    function onMessage (e) {
-      if (e.data.debug) {
-        np.inc()
-        console.log(e.data.debug)
-      } else if (e.data.progress) {
-        np.set(e.data.progress)
-      } else {
-        clean()
-        resolve(e.data)
-      }
-    }
-    function onError (e) {
-      console.log(e.data)
-      clean()
-      reject(e)
-    }
+  const input = new Subject()
+  const log = new Subject()
+  const output = new Subject()
 
-    srv.addEventListener('message', onMessage)
-    srv.addEventListener('error', onError)
+  Observable.fromEvent(srv, 'message').subscribe(({data}) => {
+    if (data.log) log.onNext(data.log)
+    else if (data !== 'alive') output.onNext(data)
+  })
+  const error = Observable.fromEvent(srv, 'error')
 
-    srv.postMessage(opt)
+  input.subscribe((d) => srv.postMessage(d))
 
-    return promise
-  }
+  return { input, error, log, output }
 }

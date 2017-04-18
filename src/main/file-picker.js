@@ -23,7 +23,7 @@ module.exports = function filePicker (opts, callback) {
 
   i.onchange = function () {
     const files = i.files
-    document.body.removeChild(i)
+    i.remove()
     callback(files)
   }
 

@@ -1,24 +1,19 @@
-/* global fetch */
-const { Subject } = require('rx-lite')
+const { Observable } = require('rx-lite')
 
-const base = 'https://cors-anywhere.herokuapp.com/rest.kegg.jp/'
+const keggReaction = require('./keggreaction')
+const biomodels = require('./biomodels')
 
-const split = (t) => t.split('\n')
-  .map((l) => l.match(/^([^\s]+)\s+(.*);\s+(.*)$/)).filter(Boolean)
-  .map(([_, id, names, reaction]) => ({ id, names, reaction, href: get(id) }))
-const text = (t) => t.text()
-const busy = new Subject()
-const get = (id) => `${base}/get/${id}`
-const keggReaction = (t) => fetch(`${base}/find/reaction/${t}`).then(text).then(split)
-
-const input = new Subject()
-const output = input
-  .filter((t) => t.length > 2)
-  .debounce(300)
-  .distinctUntilChanged()
-  .map(encodeURIComponent)
-  .tap(() => busy.onNext(true))
-  .flatMapLatest(keggReaction)
-  .tap(() => setTimeout(() => busy.onNext(false), 10))
-
-module.exports = { input, busy, output }
+module.exports = function (self) {
+  Observable.fromEvent(self, 'message')
+    .map((m) => m.data)
+    .distinctUntilChanged()
+    .filter((t) => t.length > 2)
+    .debounce(300)
+    .flatMapLatest((t) => {
+      if (t.startsWith('model')) {
+        return biomodels(t.replace('model', '').trim())
+      }
+      return keggReaction(t)
+    })
+    .subscribe((d) => self.postMessage(d))
+}
