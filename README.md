@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/lordvlad/fba.svg?branch=master)](https://travis-ci.org/lordvlad/fba)
+[![Dependencies](https://david-dm.org/lordvlad/fba.svg)](https://david-dm.org/lordvlad/fba)
 # fba
 
 Small experiment to calculate flux balance analysis in the browser.
