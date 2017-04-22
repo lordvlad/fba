@@ -2,7 +2,6 @@
 const url = 'http://localhost:8080/www.ebi.ac.uk/biomodels-main/search-models.do?cmd=TEXT:SEARCH'
 const cheerio = require('cheerio')
 
-
 module.exports = function search (term) {
   let $
 

@@ -22,7 +22,7 @@ const noModel = html`
       <li>Drag and drop an SBML file anywhere on the page</li>
       <li>Go through the file menu to open an SBML file</li>
       <li>Open the search tab and drag and drop reactions onto the page</li>
-    </ul> 
+    </ul>
   </div>
 `
 
@@ -31,7 +31,7 @@ module.exports = function contentView (appstate, emit) {
   const { model } = content || {}
   return html`
     <div style="overflow: hidden; width: 100%" class="vclCenter vclMiddle vclLayoutCenter vclLayoutHorizontal">
-      ${!model ? callout(noModel) : model.error ? callout(model.error) : modelView(model, emit)} 
+      ${!model ? callout(noModel) : model.error ? callout(model.error) : modelView(model, emit)}
     </div>
   `
 }

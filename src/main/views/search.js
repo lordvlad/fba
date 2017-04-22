@@ -11,7 +11,7 @@ const loading = html`
 const empty = html`
   <li class="vclDisabled vclNavigationItem">
     <a class=vclNavigationItemLabel href=#>
-      no results  
+      no results
     </a>
   </li>
 `
@@ -54,7 +54,7 @@ module.exports = function searchView (state, emit) {
     <div>
       <div class="vclInputGroupEmb">
         <input type=search placeholder=search onkeyup=${setterm}
-            class="vclInput vclNoBorder vclAppItem" 
+            class="vclInput vclNoBorder vclAppItem"
             value=${term} id=search
             autocomplete=off />
         <div class="vclIcogram vlcTransparent vclSquare vclAppended ${hideSpinner}"

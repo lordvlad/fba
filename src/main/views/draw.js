@@ -124,7 +124,6 @@ module.exports = function draw (model, root) {
     // .start(20, 10, 10)
     .start(20)
 
-
   let link = linksLayer
     .selectAll('.link')
     .data(graph.links)

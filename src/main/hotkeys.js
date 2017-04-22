@@ -4,7 +4,7 @@ const kill = (e) => { e.preventDefault(); e.stopPropagation() }
 const tab = (t) => ['activeMenu', t]
 const etype = (type, ...k) => { let t = keys(...k); return (e) => e.type === type && t(e) }
 const keydown = (...k) => etype('keydown', ...k)
-const keyup = (...k) => etype('keyup', ...k)
+// const keyup = (...k) => etype('keyup', ...k)
 const keys = (...ks) => { const ts = ks.map(key); return (e) => ts.some((t) => t(e)) }
 const key = (k) => {
   let s = k.split('-')

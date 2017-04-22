@@ -65,7 +65,10 @@ function handleDrop (callback, e) {
   let files = e.dataTransfer.files
   Promise
     .all(items)
-    .then((items) => callback({items, files}))
+    .then((items) => {
+      const r = {items, files}
+      callback(r)
+    })
     .catch((e) => console.error(e))
 }
 
