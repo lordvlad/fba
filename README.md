@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/lordvlad/fba.svg?branch=master)](https://travis-ci.org/lordvlad/fba)
+[![bitHound Code](https://www.bithound.io/github/lordvlad/fba/badges/code.svg)](https://www.bithound.io/github/lordvlad/fba)
 [![Coverage Status](https://coveralls.io/repos/github/lordvlad/fba/badge.svg?branch=master)](https://coveralls.io/github/lordvlad/fba?branch=master)
 [![Dependencies](https://david-dm.org/lordvlad/fba.svg)](https://david-dm.org/lordvlad/fba)
 # fba
