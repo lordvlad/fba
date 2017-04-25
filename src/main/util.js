@@ -11,9 +11,8 @@ const maybeEval = (x, c) => typeof x === 'function' ? x.call(c) : x
 const get = (keys) => (o) => keys.split('.').reduce((o, k) => o && maybeEval(o[k], o), o)
 const byProp = (...keys) => (val) => (x) => keys.reduce((o, k) => o && o[k], x) === val
 const isPromise = (obj) => typeof obj !== 'undefined' && typeof obj.then === 'function'
-const words = (s) => ({
-  [Symbol.iterator] () { return splitGen(s, ' ') }
-})
+const words = (s) => ({ [Symbol.iterator] () { return splitGen(s, ' ') } })
+
 
 /**
  * @param {IterableIterator<X>} it

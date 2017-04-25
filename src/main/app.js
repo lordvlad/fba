@@ -2,8 +2,9 @@ const choo = require('choo')
 const frs = require('filereader-stream')
 const { Observable } = require('rx-lite')
 const np = require('nprogress')
+const through = require('through2')
 
-const { search, fba, parse, kegg } = require('./services')
+const service = require('./services')
 const { Model, revive } = require('./model')
 const mainView = require('./views')
 const hotkeys = require('./hotkeys')
@@ -13,6 +14,12 @@ const filePicker = require('./file-picker')
 const app = module.exports = choo()
 
 app.route('/', mainView)
+
+app.use(function (state, emitter) {
+  emitter.on('log:debug', (...args) => console.log(...args))
+  emitter.on('log:error', (...args) => console.error(...args))
+  emitter.on('log:info', (...args) => console.info(...args))
+})
 
 app.use(function (state) {
   state.content = {}
@@ -52,13 +59,14 @@ app.use(function (state, emitter) {
       s.menu.search.term = term
       s.menu.search.busy = term && term.length > 2
       s.menu.search.results = []
-      search.input.onNext(term)
+      // search.input.onNext(term) FIXME
     },
     setModel (s, model) {
+      emit('log:debug', `loaded model '${model.id}'`)
       s.content.model = model
     },
     setFluxes (s, fluxes) {
-      console.log(fluxes)
+      emit('log:debug', fluxes)
       if (s.content.model) s.content.model.fluxes = fluxes
       else throw new Error('Cannot set fluxes when no model is loaded')
     },
@@ -66,20 +74,25 @@ app.use(function (state, emitter) {
       emit('setModel', new Model())
     },
     openModelFile (state, _, emit) {
-      filePicker({accept: 'xml'}, (files) => emit('dropFiles', files))
+      filePicker({accept: 'xml'}, (files) => emit('loadModelFile', files))
     },
-    dropFiles (state, files, emit) {
+    loadModelFile (state, files, emit) {
+      emit('log:debug', `loading model file '${files[0].name}'`)
       np.start()
-      frs(files[0])
-        .on('data', (data) => parse.input.onNext({data}))
-        .on('end', () => parse.input.onNext({end: true}))
+      const wrap = (fn) => through.obj(function (o) { this.push(fn(o)) })
+      frs(files[0]).pipe(service.createStream('sbml'))
+        .pipe(wrap(revive))
+        .on('data', console.log.bind(console))
+        .on('end', console.log.bind(console, 'end'))
+        // .on('data', (data) => parse.input.onNext({data}))
+        // .on('end', () => parse.input.onNext({end: true}))
     },
     dropItems (state, [href], emit) {
-      if (!state.content.model) return
-      kegg.input.onNext({href})
-      kegg.output.filter((m) => m.href === href).subscribe((m) => {
-        console.log(m)
-      })
+      // if (!state.content.model) return FIXME
+      // kegg.input.onNext({href})
+      // kegg.output.filter((m) => m.href === href).subscribe((m) => {
+      //   emit('log:debug', m)
+      // })
     },
     blur (state, data, emit) {
       document.activeElement.blur()
@@ -91,14 +104,14 @@ app.use(function (state, emitter) {
       }, 10)
     },
     runFBA (state, _, emit) {
-      if (state.content.model) {
-        const model = state.content.model
-        const options = {}
+      // if (state.content.model) { FIXME
+      //   const model = state.content.model
+      //   const options = {}
 
-        fba({model, options})
-          .then((result) => emit('setFluxes', result))
-          .catch((e) => console.error(e))
-      }
+        // fba({model, options})
+        //   .then((result) => emit('setFluxes', result))
+        //   .catch((e) => emit('log:error', e))
+      // }
     }
   }).forEach(reduce)
 })
@@ -107,17 +120,18 @@ app.use(function (state, emitter) {
   const emit = emitter.emit.bind(emitter)
 
   // searchResultStream
-  search.output.subscribe((results) => emit('searchResults', results, noop))
-  search.log.subscribe((m) => console.log(m))
-  search.error.subscribe((e) => console.error(e))
+  // search.output.subscribe((results) => emit('searchResults', results, noop)) FIXME
+  // search.log.subscribe((m) => emit('log:debug', m))
+  // search.error.subscribe((e) => emit('log:error', e))
 
   // parse
-  parse.output
-    .map((m) => revive(m))
-    .tap(() => np.done())
-    .subscribe((m) => emit('setModel', m, noop))
-  parse.log.subscribe((m) => console.log(m))
-  parse.error.subscribe((e) => console.error(e))
+  // parse.output FIXME
+  //   .tap((x) => emit('log:debug', 'done parsing'))
+  //   .map((m) => revive(m))
+  //   .tap(() => np.done())
+  //   .subscribe((m) => emit('setModel', m))
+  // parse.log.subscribe((m) => emit('log:debug', m))
+  // parse.error.subscribe((e) => emit('log:error', e))
 
   // hotkeys
   Observable.fromEvent(document.body, 'keydown')
@@ -130,6 +144,6 @@ app.use(function (state, emitter) {
   // drop
   dnd(document.body, ({ items, files }) => {
     if (items.length) emit('dropItems', items, noop)
-    if (files.length) emit('dropFiles', files, noop)
+    if (files.length) emit('loadModelFile', files, noop)
   })
 })
