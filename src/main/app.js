@@ -79,13 +79,9 @@ app.use(function (state, emitter) {
     loadModelFile (state, files, emit) {
       emit('log:debug', `loading model file '${files[0].name}'`)
       np.start()
-      const wrap = (fn) => through.obj(function (o) { this.push(fn(o)) })
-      frs(files[0]).pipe(service.createStream('sbml'))
-        .pipe(wrap(revive))
-        .on('data', console.log.bind(console))
-        .on('end', console.log.bind(console, 'end'))
-        // .on('data', (data) => parse.input.onNext({data}))
-        // .on('end', () => parse.input.onNext({end: true}))
+      const pipewrap = (fn) => through.obj(function (o) { this.push(fn(o)) })
+      frs(files[0]).pipe(service.createStream('sbml')).pipe(pipewrap(revive))
+        .on('data', (m) => np.done() && emit('setModel', m))
     },
     dropItems (state, [href], emit) {
       // if (!state.content.model) return FIXME
