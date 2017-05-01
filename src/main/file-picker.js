@@ -1,3 +1,6 @@
+let el
+let onchange
+
 /**
  * Force-open a filePicker dialog, like the one seen when
  * clicking on a file selection input. Will call {@code callback}
@@ -10,23 +13,19 @@
  * @param {function} callback
  */
 module.exports = function filePicker (opts, callback) {
-  if (arguments.length === 1) {
-    callback = opts
-    opts = {}
-  }
+  if (!el) create()
+  onchange = callback || function () {}
 
-  const i = document.createElement('input')
-  i.type = 'file'
-  if (opts.accept) i.accept = opts.accept
-  if (opts.multiple) i.multiple = opts.multiple
-  if (opts.dir) i.dir = opts.dir
+  if (opts.multiple) el.multiple = opts.multiple
+  if (opts.accept) el.accept = opts.accept
+  if (opts.dir) el.dir = opts.dir
 
-  i.onchange = function () {
-    const files = i.files
-    i.remove()
-    callback(files)
-  }
+  el.click()
+}
 
-  document.body.appendChild(i)
-  i.click()
+function create () {
+  el = document.createElement('input')
+  el.type = 'file'
+  el.onchange = () => onchange && onchange(Array.from(el.files))
+  // document.body.appendChild(el)
 }

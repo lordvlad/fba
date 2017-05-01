@@ -2,12 +2,20 @@ const html = require('choo/html')
 const draw = require('./draw')
 
 function modelView (model, emit) {
-  const load = () => setTimeout(() => draw(model, document.body.querySelector('#graph')), 1000)
+  const id = 'model_' + model.id
+  let done = false
+  const load = () => setTimeout(() => {
+    if (done) return
+    done = true
+    draw(model, document.body.querySelector(`#${id}`))
+  }, 1000)
   const style = 'height:100%; width:100%'
-  const node = html`
-    <div id=graph class=graph style=${style} onload=${load}></div>
-  `
-  node.isSameNode = function (o) { return o && o.nodeName && o.id === 'graph' }
+  const node = html`<div id=${id} class=graph style=${style} onload=${load}></div>`
+  node.isSameNode = function (o) {
+    const r = o && o.nodeName && o.id === this.id
+    if (!r) load()
+    return r
+  }
   return node
 }
 

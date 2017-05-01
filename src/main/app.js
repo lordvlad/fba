@@ -81,7 +81,10 @@ app.use(function (state, emitter) {
       np.start()
       const pipewrap = (fn) => through.obj(function (o) { this.push(fn(o)) })
       frs(files[0]).pipe(service.createStream('sbml')).pipe(pipewrap(revive))
-        .on('data', (m) => np.done() && emit('setModel', m))
+        .on('data', (m) => {
+          np.done()
+          emit('setModel', m)
+        })
     },
     dropItems (state, [href], emit) {
       // if (!state.content.model) return FIXME

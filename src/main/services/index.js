@@ -7,8 +7,7 @@ const mux = new MuxDemux()
 mux.pipe(new WorkerDuplex(worker)).pipe(mux)
 
 setTimeout(() => {
-  console.log('yo')
   mux.createReadStream('log').on('data', (x) => console.log(x))
-}, 1000)
+}, 100)
 
 module.exports = mux
