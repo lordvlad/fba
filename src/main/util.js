@@ -13,7 +13,6 @@ const byProp = (...keys) => (val) => (x) => keys.reduce((o, k) => o && o[k], x) 
 const isPromise = (obj) => typeof obj !== 'undefined' && typeof obj.then === 'function'
 const words = (s) => ({ [Symbol.iterator] () { return splitGen(s, ' ') } })
 
-
 /**
  * @param {IterableIterator<X>} it
  * @param {Function} fn
@@ -99,7 +98,6 @@ function defer () {
   let p = new Promise(function (resolve, reject) { res = resolve; rej = reject })
   return { promise: p, resolve: res, reject: rej }
 }
-
 
 module.exports = {
   defer,
