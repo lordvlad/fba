@@ -6,9 +6,7 @@
   "main": "src/main/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\"",
-    "start": "npm-run-all --npm-path yarn -p start-proxy start-ui",
-    "start-proxy": "node src/main/proxy -p 8080",
-    "start-ui": "bankai -d -p 9966 -y false -u false start src/main/index",
+    "start": "bankai -d -p 9966 -y false -u false start src/main/index",
     "build": "bankai -u false build src/main/index dist/",
     "deploy": "surge -p dist -d flux.surge.sh"
   },
@@ -28,7 +26,6 @@
     "browserify": "^14.3.0",
     "cheerio": "^0.22.0",
     "choo": "^5.2.0",
-    "cors-anywhere": "^0.4.0",
     "cwise": "^1.0.9",
     "d3": "3",
     "deep-assign": "^2.0.0",
@@ -53,7 +50,6 @@
     "ndarray-ops": "^1.2.2",
     "ndarray-optimization": "tab58/ndarray-optimization",
     "ndarray-show": "^2.0.0",
-    "npm-run-all": "^4.0.2",
     "nprogress": "^0.2.0",
     "object-assign": "^4.1.0",
     "sax": "^1.2.1",

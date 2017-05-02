@@ -1,6 +1,7 @@
 /* global Headers, fetch */
-const url = 'http://localhost:8080/www.ebi.ac.uk/biomodels-main/search-models.do?cmd=TEXT:SEARCH'
 const cheerio = require('cheerio')
+const base = require('./cors-anywhere')
+const url = `www.ebi.ac.uk/biomodels-main/search-models.do?cmd=TEXT:SEARCH`
 
 module.exports = function search (term) {
   let $
@@ -14,7 +15,7 @@ module.exports = function search (term) {
     return {id, name}
   }
 
-  return fetch(url, {
+  return fetch(`${base}/${url}`, {
     headers: new Headers({
       'content-type': 'application/x-www-form-urlencoded;charset=UTF-8'
     }),
