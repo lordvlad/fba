@@ -1,5 +1,9 @@
 language: node_js
 node_js: "7"
 cache: yarn
-script: yarn run build
-after_success: yarn run deploy
+script:
+  - yarn run test
+  - yarn run build
+after_success:
+  - yarn run deploy
+  - yarn run report

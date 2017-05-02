@@ -5,7 +5,8 @@
   "description": "",
   "main": "src/main/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\"",
+    "test": "nyc ava",
+    "report": "nyc report --reporter=text-lcov | coveralls",
     "start": "bankai -d -p 9966 -y false -u false start src/main/index",
     "build": "bankai -u false build src/main/index dist/",
     "deploy": "surge -p dist -d flux.surge.sh"
@@ -21,11 +22,13 @@
   "devDependencies": {
     "@reactivex/rxjs": "^5.0.1",
     "assign-deep": "^0.4.5",
+    "ava": "^0.19.1",
     "bankai": "lordvlad/bankai",
     "baobab": "^2.3.4",
     "browserify": "^14.3.0",
     "cheerio": "^0.22.0",
     "choo": "^5.2.0",
+    "coveralls": "^2.13.1",
     "cwise": "^1.0.9",
     "d3": "3",
     "deep-assign": "^2.0.0",
@@ -51,6 +54,7 @@
     "ndarray-optimization": "tab58/ndarray-optimization",
     "ndarray-show": "^2.0.0",
     "nprogress": "^0.2.0",
+    "nyc": "^10.3.0",
     "object-assign": "^4.1.0",
     "sax": "^1.2.1",
     "setprototypeof": "^1.0.2",
