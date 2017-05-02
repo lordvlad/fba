@@ -7,13 +7,17 @@ const sax = require('sax')
 const { last, pop, push } = require('../util')
 const { Model } = require('../model')
 
-module.exports = (o) => pipe(read(o), build(o))
+module.exports = (o) => pipe(read(o), build())
 
 const getChild = (o, $name) => o.$children.find((x) => x.$name === $name) || {}
 const listOf = (o, what) => getChild(o, `listOf${what}`).$children || []
 const clean = (o) => omit(o, ['$children', 'annotation', '$name'])
 
-function mkgraph (o, opt = {}) {
+function build () {
+  return through.obj((d, _, c) => c(null, mkgraph(d)))
+}
+
+function mkgraph (o) {
   let m = new Model(clean(o))
 
   for (let c of listOf(o, 'Compartments')) m.addCompartment(clean(c))
@@ -26,10 +30,6 @@ function mkgraph (o, opt = {}) {
   }
 
   return m
-}
-
-function build (opt = {}) {
-  return through.obj((d, _, c) => c(null, mkgraph(d, opt)))
 }
 
 function read (opt = { strict: true }) {
