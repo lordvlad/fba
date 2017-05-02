@@ -2,12 +2,9 @@ const assign = require('object-assign')
 const ndarray = require('ndarray')
 
 const clonable = ['ATP', 'ADP', 'NAD', 'NADH', 'NADP', 'NADPH', 'P', 'O2', 'H2O']
-
 const cons = ({}).constructor
-
 const isObj = (o) => o !== null && typeof o === 'object'
 const isArr = (o) => o !== null && Array.isArray(o)
-
 const entries = (o) => o instanceof Map ? o.entries() : Object.entries(o)
 
 function revive (o) {
@@ -35,6 +32,19 @@ function revive (o) {
   return rev(o)
 }
 
+function create (attributes) {
+  switch (attributes.$name) {
+    case 'model': return new Model(attributes)
+    case 'unitDefinition': return new Unit(attributes)
+    case 'compartment': return new Compartment(attributes)
+    case 'species': return new Species(attributes)
+    case 'reaction': return new Reaction(attributes)
+    case 'speciesReference': return new SpeciesReference(attributes)
+    case 'modifierSpeciesReference': return new ModifierSpeciesReference(attributes)
+    default: return attributes
+  }
+}
+
 class Clazz {
   constructor (attr) {
     assign(this, attr, { $constructor: this.constructor.name })
@@ -42,6 +52,7 @@ class Clazz {
 }
 
 class Entity extends Clazz {
+  get label () { return this.id }
 }
 
 class Shape extends Clazz {
@@ -80,13 +91,13 @@ class Transform extends Rect {
 
 class Pool extends Entity {
   constructor (species) { super({species, refs: [], clones: []}) }
+  get id () { return this.species.id }
   addClone () { let c = new PoolClone(this); this.clones.push(c); return c }
   getClone () {
     if (clonable.indexOf(this.id) !== -1) return this.addClone()
     if (this.clones.length < 1) return this.addClone()
     return this.clones[0]
   }
-  get id () { return this.species.id }
 }
 
 class PoolClone extends Rect {
@@ -183,14 +194,6 @@ class Model extends Entity {
   }
 }
 
-class Species extends Entity {
-  get label () { return this.id }
-}
-
-class Compartment extends Entity {
-  get label () { return this.id }
-}
-
 class Link extends Entity {
   constructor (source, target, reversible = true) { super({source, target, reversible}) }
   get className () { return 'link' + (this.reversible ? ' reversible' : '') }
@@ -200,7 +203,6 @@ class ModifierLink extends Link {
   get className () { return 'link modifier' }
 }
 
-class Unit extends Entity { }
 class Reaction extends Entity {
   constructor (attr) { super(assign({reversible: true, modifiers: [], reactants: [], products: []}, attr)) }
   get label () { return this.name }
@@ -230,28 +232,24 @@ class Reaction extends Entity {
     return c
   }
 
-  addModifier (x) {
-    let s = this._mkSpeciesRef(x)
-    let c = this._getClone(s)
-    this.modifiers.push(s)
-    this.model.graph.links.push(new ModifierLink(c, this.transform))
+  _addMod (x, arr, Cls) {
+    const s = this._mkSpeciesRef(x)
+    const c = this._getClone(s)
+    arr.push(s)
+    this.model.graph.links.push(new Cls(c, this.transform, this.reversible))
     return s
+  }
+
+  addModifier (x) {
+    return this._addMod(x, this.modifiers, ModifierLink)
   }
 
   addReactant (x) {
-    let s = this._mkSpeciesRef(x)
-    let c = this._getClone(s)
-    this.reactants.push(s)
-    this.model.graph.links.push(new Link(c, this.transform, this.reversible))
-    return s
+    return this._addMod(x, this.reactants, Link)
   }
 
   addProduct (x) {
-    let s = this._mkSpeciesRef(x)
-    let c = this._getClone(s)
-    this.products.push(s)
-    this.model.graph.links.push(new Link(this.transform, c, this.reversible))
-    return s
+    return this._addMod(x, this._products, Link)
   }
 }
 
@@ -259,20 +257,11 @@ class SpeciesReference extends Entity {
   constructor (attr) { super(assign({stoichiometry: 1}, attr)) }
 }
 
+class Unit extends Entity { }
+class Species extends Entity { }
+class Compartment extends Entity { }
 class ModifierSpeciesReference extends SpeciesReference {}
 
-const create = (attributes) => {
-  switch (attributes.$name) {
-    case 'model': return new Model(attributes)
-    case 'unitDefinition': return new Unit(attributes)
-    case 'compartment': return new Compartment(attributes)
-    case 'species': return new Species(attributes)
-    case 'reaction': return new Reaction(attributes)
-    case 'speciesReference': return new SpeciesReference(attributes)
-    case 'modifierSpeciesReference': return new ModifierSpeciesReference(attributes)
-    default: return attributes
-  }
-}
 
 module.exports = {
   Pool,
