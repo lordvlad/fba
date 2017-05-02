@@ -262,7 +262,6 @@ class Species extends Entity { }
 class Compartment extends Entity { }
 class ModifierSpeciesReference extends SpeciesReference {}
 
-
 module.exports = {
   Pool,
   PoolClone,
