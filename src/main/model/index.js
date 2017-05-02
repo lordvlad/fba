@@ -249,7 +249,7 @@ class Reaction extends Entity {
   }
 
   addProduct (x) {
-    return this._addMod(x, this._products, Link)
+    return this._addMod(x, this.products, Link)
   }
 }
 
