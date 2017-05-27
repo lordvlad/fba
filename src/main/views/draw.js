@@ -2,7 +2,7 @@ const cola = require('webcola')
 const assign = require('object-assign')
 const d3 = window.d3 = require('d3')
 
-const { get } = require('../util')
+const { get } = require('../lib/util')
 
 const either = (cond, defaul, ...arr) => (d) => {
   for (let a of arr) {

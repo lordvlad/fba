@@ -38,8 +38,13 @@ module.exports = function contentView (appstate, emit) {
   const { content } = appstate
   const { model } = content || {}
   return html`
-    <div style="overflow: hidden; width: 100%" class="vclCenter vclMiddle vclLayoutCenter vclLayoutHorizontal">
-      ${!model ? callout(noModel) : model.error ? callout(model.error) : modelView(model, emit)}
+    <div class="v-top dib h-100">
+      content
     </div>
   `
+  // return html`
+  //   <div style="overflow: hidden; width: 100%" class="vclCenter vclMiddle vclLayoutCenter vclLayoutHorizontal">
+  //     ${!model ? callout(noModel) : model.error ? callout(model.error) : modelView(model, emit)}
+  //   </div>
+  // `
 }

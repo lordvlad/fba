@@ -1,1 +1,1 @@
-module.exports = 'https://cors-anywhere.herokuapp.com/'
+module.exports = 'https://cors-anywhere.herokuapp.com'

@@ -7,11 +7,14 @@ const through = require('through2')
 const service = require('./services')
 const { Model, revive } = require('./model')
 const mainView = require('./views')
-const hotkeys = require('./hotkeys')
-const { noop, dnd } = require('./util')
-const filePicker = require('./file-picker')
+const hotkeys = require('./lib/hotkeys')
+const { noop, dnd } = require('./lib/util')
+const filePicker = require('./lib/file-picker')
+
+const pipewrap = (fn) => through.obj(function (o) { this.push(fn(o)) })
 
 const app = module.exports = choo()
+const search = service.createStream('search')
 
 app.route('/', mainView)
 
@@ -25,11 +28,13 @@ app.use(function (state) {
   state.content = {}
   state.menu = {
     active: null,
-    search: {
-      searchId: 'search',
-      term: '',
-      busy: false,
-      results: []
+    file: {
+      search: {
+        searchId: 'search',
+        term: '',
+        busy: false,
+        results: []
+      }
     }
   }
 })
@@ -48,18 +53,19 @@ app.use(function (state, emitter) {
 
   Object.entries({
     activeMenu (s, active) {
+      emitter.emit('log:debug', `activeMenu ${active}`)
       s.menu.active = active === s.menu.active ? null : active
     },
     searchResults (s, results) {
-      s.menu.search.results = results
-      s.menu.search.busy = false
+      s.menu.file.search.results = results
+      s.menu.file.search.busy = false
     },
     searchFor (s, term, emit) {
-      if (term === s.menu.search.term) return
-      s.menu.search.term = term
-      s.menu.search.busy = term && term.length > 2
-      s.menu.search.results = []
-      // search.input.onNext(term) FIXME
+      if (term === s.menu.file.search.term) return
+      s.menu.file.search.term = term
+      s.menu.file.search.busy = term && term.length > 2
+      s.menu.file.search.results = []
+      search.write(term)
     },
     setModel (s, model) {
       emit('log:debug', `loaded model '${model.id}'`)
@@ -79,8 +85,9 @@ app.use(function (state, emitter) {
     loadModelFile (state, files, emit) {
       emit('log:debug', `loading model file '${files[0].name}'`)
       np.start()
-      const pipewrap = (fn) => through.obj(function (o) { this.push(fn(o)) })
-      frs(files[0]).pipe(service.createStream('sbml')).pipe(pipewrap(revive))
+      frs(files[0])
+        .pipe(service.createStream('sbml'))
+        .pipe(pipewrap(revive))
         .on('data', (m) => {
           np.done()
           emit('setModel', m)
@@ -119,18 +126,9 @@ app.use(function (state, emitter) {
   const emit = emitter.emit.bind(emitter)
 
   // searchResultStream
-  // search.output.subscribe((results) => emit('searchResults', results, noop)) FIXME
-  // search.log.subscribe((m) => emit('log:debug', m))
-  // search.error.subscribe((e) => emit('log:error', e))
-
-  // parse
-  // parse.output FIXME
-  //   .tap((x) => emit('log:debug', 'done parsing'))
-  //   .map((m) => revive(m))
-  //   .tap(() => np.done())
-  //   .subscribe((m) => emit('setModel', m))
-  // parse.log.subscribe((m) => emit('log:debug', m))
-  // parse.error.subscribe((e) => emit('log:error', e))
+  search
+    .on('data', (results) => emit('searchResults', results, noop))
+    .on('error', (e) => emit('log:error', e))
 
   // hotkeys
   Observable.fromEvent(document.body, 'keydown')

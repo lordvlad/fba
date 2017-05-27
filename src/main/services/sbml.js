@@ -4,7 +4,7 @@ const assign = require('object-assign')
 const omit = require('lodash/omit')
 const sax = require('sax')
 
-const { last, pop, push } = require('../util')
+const { last, pop, push } = require('../lib/util')
 const { Model } = require('../model')
 
 module.exports = (o) => pipe(read(o), build())

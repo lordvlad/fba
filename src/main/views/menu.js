@@ -1,58 +1,50 @@
 const html = require('choo/html')
+const css = require('sheetify')
 
-const { killEvent } = require('./util')
+const { killEvent, li } = require('./util')
 const fileView = require('./file')
-const searchView = require('./search')
 const networkView = require('./network')
 const calcView = require('./calc')
 const optionsView = require('./options')
 
-function wrap (tab) {
-  return html`
-    <div class="vclLayoutVertical inner-sidebar" style="width: 240px">
-      ${tab}
-    </div>
-  `
-}
+const width = css`:host { width: 240px; }`
 
 module.exports = function menuView (appstate, emit) {
   const state = appstate.menu
-  const selected = (title) => state.active === title ? 'vclSelected' : ''
-  const disabled = (t) => t ? 'vclDisabled' : ''
-  const select = (what) => () => emit('activeMenu', what)
-  const li = (title, icon, dis = false) => html`
-    <li class="vclNavigationItem ${disabled(dis)} ${selected(title)}"
-        role=presentation href=# aria-selected=${state.active === title}>
-      <a class=vclNavigationItemLabel title=${title}
-          onclick=${dis ? killEvent : select(title)}>
-        <i class="vclIcon fa fa-fw fa-${icon}"></i>
-      </a>
-    </li>
-  `
+  const select = (what) => (e) => killEvent(e) && emit('activeMenu', what)
+
+  const wrap = (e) => html`<div class="${width} dib">${e}</div>`
 
   const tab = ({
     file: () => wrap(fileView(state.file, emit)),
-    search: () => wrap(searchView(state.search, emit)),
     network: () => wrap(networkView(state.network, emit)),
     calculate: () => wrap(calcView(state.clac, emit)),
     options: () => wrap(optionsView(state.options, emit)),
     [null]: () => ''
   })[state.active]()
 
+  const lii = (title, icon, disabled = false) => li({title,
+    icon,
+    onclick: select(title),
+    selected: state.active === title,
+    disabled,
+    text: false,
+    styles: 'pa3'
+  })
+
   return html`
-    <div class="vclLayoutHorizontal vlcLayoutFlex">
-      <div class="vclLayoutVertical sidebar">
-        <nav class="vclNavigation vclLayoutVertical vclLayoutFlex vclVertical">
-          <ul>
-            ${li('file', 'file-o')}
-            ${li('search', 'search')}
-            ${li('network', 'code-fork', !appstate.content.model)}
-            ${li('calculate', 'calculator', !appstate.content.model)}
-            ${li('options', 'wrench')}
-          </ul>
-        </nav>
+    <div class="pa0 ma0 h-100 dib v-top flex flex-row">
+      <div class="dib pa0 ma0 h-100 v-top bg-black-80">
+        <ul class="list pa0 ma0">
+          ${lii('file', 'file-o')}
+          ${lii('network', 'code-fork', !appstate.content.model)}
+          ${lii('calculate', 'calculator', !appstate.content.model)}
+          ${lii('options', 'wrench')}
+        </ul>
       </div>
-      ${tab}
+      <div class="dib pa0 ma0 h-100 v-top bg-black-60">
+        ${tab}
+      </div>
     </div>
   `
 }
