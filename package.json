@@ -7,14 +7,9 @@
   "scripts": {
     "test": "nyc ava",
     "report": "nyc report --reporter=text-lcov | coveralls",
-    "start": "bankai -d -p 9966 -y false -u false start src/main/index",
-    "build": "bankai -u false build src/main/index dist/",
+    "start": "bankai -c [ -u sheetify-cssnext ] -d -p 9966 -y false -u false start src/main/index",
+    "build": "bankai -c [ -u sheetify-cssnext ] -u false build src/main/index dist/",
     "deploy": "surge -p dist -d flux.surge.sh"
-  },
-  "browserify": {
-    "transform": [
-      "vee-cee-ellify"
-    ]
   },
   "keywords": [],
   "author": "Waldemar Reusch <waldemar.reusch@googlemail.com>",
@@ -59,8 +54,11 @@
     "object-assign": "^4.1.0",
     "sax": "^1.2.1",
     "setprototypeof": "^1.0.2",
+    "sheetify-cssnext": "^1.0.7",
     "standard": "10",
     "surge": "^0.19.0",
+    "tachyons": "^4.7.1",
+    "tachyons-debug-grid": "^1.2.3",
     "through2": "^2.0.3",
     "traverse": "^0.6.6",
     "vcl-adv-text-structure": "^0.1.0",
