@@ -3,6 +3,11 @@ const Fifo = require('fifo-array')
 
 const LOG_LENGTH = 10
 
+function scrollUp () {
+  const el = document.querySelector('#console')
+  if (el) el.scrollTop = el.scrollHeight
+}
+
 module.exports = function () {
   return function (state, emitter) {
     const c = state.console = {
@@ -15,10 +20,7 @@ module.exports = function () {
     const on = emitter.on.bind(emitter)
     const render = () => {
       emitter.emit('render')
-      setTimeout(function () {
-        const el = document.querySelector('#console')
-        if (el) el.scrollTop = el.scrollHeight
-      }, 10)
+      setTimeout(scrollUp, 10)
     }
     const toggle = (x) => {
       emit('log:debug', `${x ? 'opening' : 'closing'} console`)
