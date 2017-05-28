@@ -1,7 +1,7 @@
 const test = require('ava')
 const fs = require('fs')
 const sbml = require('../main/services/sbml')
-const { defer, words } = require('../main/util')
+const { defer, words } = require('../main/lib/util')
 
 test('test reading a file', async function (t) {
   for (let file of words('gly tca')) {
