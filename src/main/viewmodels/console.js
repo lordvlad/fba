@@ -1,3 +1,4 @@
+/* global document */
 const Fifo = require('fifo-array')
 
 const LOG_LENGTH = 10
@@ -8,7 +9,13 @@ module.exports = function () {
 
     const emit = emitter.emit.bind(emitter)
     const on = emitter.on.bind(emitter)
-    const render = () => emitter.emit('render')
+    const render = () => {
+      emitter.emit('render')
+      setTimeout(function () {
+        const el = document.querySelector('#console')
+        if (el) el.scrollTop = el.scrollHeight
+      }, 10)
+    }
     const toggle = (x) => {
       emit('log:debug', `${x ? 'opening' : 'closing'} console`)
       c.open = x
@@ -18,17 +25,17 @@ module.exports = function () {
     const debug = (...args) => console.log(...args)
     const info = (...args) => {
       console.info(...args)
-      c.msgs.push({info: true, icon: 'info-circle', color: 'blue', args})
+      c.msgs.push({info: true, args})
       c.open && render()
     }
     const warn = (...args) => {
       console.warn(...args)
-      c.msgs.push({warn: true, icon: 'warning', color: 'yellow', args})
+      c.msgs.push({warning: true, args})
       c.open && render()
     }
     const error = (...args) => {
       console.error(...args)
-      c.msgs.push({error: true, icon: 'warning', color: 'red', args})
+      c.msgs.push({error: true, args})
       c.open && render()
     }
 
