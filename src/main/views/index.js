@@ -20,7 +20,7 @@ css('../styles/graph-styles.css')
 
 module.exports = function mainView (state, emit) {
   return html`
-    <body class="f6 h-100">
+    <body class="f6 sans-serif h-100">
       <div class="flex flex-column h-100 w-100">
         <div class="flex flex-row h-100">
           ${menuView(state, emit)}
