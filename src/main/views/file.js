@@ -9,6 +9,7 @@ module.exports = function fileView (state, send) {
       ${lii('new model', 'file-o', () => send('model:new'))}
       ${lii('open sbml file\u2026', 'folder-open-o', () => send('file:select:file'))}
       ${lii('open sbml url\u2026', 'external-link', () => send('file:select:url'))}
+      ${lii('open biomodels id\u2026', 'external-link', () => send('file:select:biomodelsid'))}
     </ul>
   `
 }

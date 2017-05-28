@@ -1,8 +1,7 @@
 const html = require('choo/html')
 const draw = require('./draw')
-const cors = require('../lib/cors-anywhere')
 
-const exampleUrl = `${cors}/http://www.ebi.ac.uk/biomodels-main/download?mid=BIOMD0000000172`
+const exampleId = 'BIOMD0000000172'
 
 function modelView (model, emit) {
   const id = 'model_' + model.id
@@ -27,7 +26,7 @@ const callout = (inner) => html`
 `
 
 module.exports = function contentView ({content}, emit) {
-  const example = () => emit('file:open:url', exampleUrl)
+  const example = () => emit('file:open:biomodelsid', exampleId)
 
   const noModel = html`
     <div class="pa0 ma0">
