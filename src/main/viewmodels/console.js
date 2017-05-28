@@ -5,7 +5,11 @@ const LOG_LENGTH = 10
 
 module.exports = function () {
   return function (state, emitter) {
-    const c = state.console = {open: false, msgs: new Fifo(LOG_LENGTH)}
+    const c = state.console = {
+      open: false,
+      msgs: new Fifo(LOG_LENGTH),
+      notification: false
+    }
 
     const emit = emitter.emit.bind(emitter)
     const on = emitter.on.bind(emitter)
@@ -19,6 +23,7 @@ module.exports = function () {
     const toggle = (x) => {
       emit('log:debug', `${x ? 'opening' : 'closing'} console`)
       c.open = x
+      if (x && c.notification) c.notification = false
       render()
     }
 
@@ -26,17 +31,21 @@ module.exports = function () {
     const info = (...args) => {
       console.info(...args)
       c.msgs.push({info: true, args})
-      c.open && render()
+      if (c.open) render()
     }
     const warn = (...args) => {
       console.warn(...args)
       c.msgs.push({warning: true, args})
-      c.open && render()
+      if (c.open) render()
     }
     const error = (...args) => {
       console.error(...args)
       c.msgs.push({error: true, args})
-      c.open && render()
+      if (c.open) render()
+      else if (!c.notification) {
+        c.notification = true
+        render()
+      }
     }
 
     on('log:debug', debug)
