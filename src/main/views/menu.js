@@ -7,7 +7,7 @@ const networkView = require('./network')
 const calcView = require('./calc')
 const optionsView = require('./options')
 
-const width = css`:host > ul { width: 12em }`
+const width = css`:host > ul { width: 16em }`
 
 module.exports = function menuView ({menu, content}, emit) {
   const select = (what) => (e) => emit('menu:active', what)
