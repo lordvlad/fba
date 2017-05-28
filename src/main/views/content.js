@@ -1,8 +1,6 @@
 const html = require('choo/html')
 const draw = require('./draw')
 
-const exampleId = 'BIOMD0000000172'
-
 function modelView (model, emit) {
   const id = 'model_' + model.id
   let done = false
@@ -26,7 +24,7 @@ const callout = (inner) => html`
 `
 
 module.exports = function contentView ({content}, emit) {
-  const example = () => emit('file:open:biomodelsid', exampleId)
+  const example = () => emit('file:open:biomodelsid', content.exampleId)
 
   const noModel = html`
     <div class="pa0 ma0">
@@ -34,7 +32,6 @@ module.exports = function contentView ({content}, emit) {
       <ul>
         <li>Drag and drop an SBML file anywhere on the page</li>
         <li>Go through the file menu to open an SBML file</li>
-        <li>Open the search tab and drag and drop reactions onto the page</li>
         <li>Open an <a href=# onclick=${example}>example model</a></li>
       </ul>
     </div>
