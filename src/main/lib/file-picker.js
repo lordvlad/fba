@@ -26,6 +26,6 @@ module.exports = function filePicker (opts, callback) {
 function create () {
   el = document.createElement('input')
   el.type = 'file'
-  el.onchange = () => onchange && onchange(Array.from(el.files))
+  el.onchange = () => onchange && onchange(el.files ? Array.from(el.files) : [])
   // document.body.appendChild(el)
 }

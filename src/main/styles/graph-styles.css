@@ -1,0 +1,75 @@
+.graph::shadow svg {
+  font: 10px sans-serif;
+}
+
+.graph::shadow svg text {
+  user-select: none;
+}
+
+.graph::shadow svg .axis path, .graph::shadow svg .axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.graph::shadow svg .background {
+  stroke: white;
+  stroke-width: 1px;
+  fill: white;
+}
+
+.graph::shadow svg .node {
+  stroke: black;
+  stroke-width: 1px;
+  cursor: move;
+}
+
+.graph::shadow svg .node.reaction {
+  fill: lightcoral;
+}
+
+.graph::shadow svg .node.pool {
+  fill: steelblue;
+}
+
+.graph::shadow svg .node.pool.clone {
+  fill: lightblue;
+}
+
+.graph::shadow svg .group.compartment.cell, .graph::shadow svg .group.compartment.cytosol {
+  fill: cadetblue;
+}
+
+.graph::shadow svg .group.compartment.ext, .graph::shadow svg .group.compartment.extracellular {
+  fill: salmon;
+}
+
+.graph::shadow svg .link {
+  fill: none;
+  stroke: #000;
+  stroke-width: 3px;
+  opacity: 0.7;
+  marker-end: url(#end-arrow);
+}
+
+.graph::shadow svg .link.reversible {
+  marker-start: url(#end-arrow);
+}
+
+.graph::shadow svg .link.modifier {
+  marker-end: url(#end-circle);
+}
+
+.graph::shadow svg .label {
+  fill: black;
+  font-family: Verdana;
+  font-size: 25px;
+  text-anchor: middle;
+  cursor: move;
+  pointer-events: none;
+}
+
+.graph::shadow svg .guideline {
+  stroke: orangered;
+  stroke-width: 4px;
+}

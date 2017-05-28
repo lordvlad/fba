@@ -1,3 +1,5 @@
+const through = require('through2')
+
 const isDefined = (x) => typeof x !== 'undefined'
 const func = (fn) => (...args) => isDefined(args[0]) ? fn(...args) : 0[0]
 const last = func((a) => a[a.length - 1])
@@ -99,7 +101,11 @@ function defer () {
   return { promise: p, resolve: res, reject: rej }
 }
 
+const pipewrap = (fn) => through.obj(function (o) { this.push(fn(o)) })
+
 module.exports = {
+  pipewrap,
+  killEvent,
   defer,
   noop: () => {},
   toKebab,

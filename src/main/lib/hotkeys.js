@@ -1,7 +1,7 @@
 const m = new Map()
 
 const kill = (e) => { e.preventDefault(); e.stopPropagation() }
-const tab = (t) => ['activeMenu', t]
+const tab = (t) => ['menu:active', t]
 const etype = (type, ...k) => { let t = keys(...k); return (e) => e.type === type && t(e) }
 const keydown = (...k) => etype('keydown', ...k)
 // const keyup = (...k) => etype('keyup', ...k)
@@ -19,8 +19,8 @@ m.set(keydown('alt-f'), [tab('file')])
 m.set(keydown('alt-n'), [tab('network')])
 m.set(keydown('alt-c'), [tab('calculate')])
 m.set(keydown('alt-o'), [tab('options')])
-m.set(keydown('ctrl-o'), [['openModelFile']])
-m.set(keydown('ctrl-n'), [['newModel']])
+m.set(keydown('ctrl-o'), [['file:open:select']])
+m.set(keydown('ctrl-n'), [['model:new']])
 m.set(keydown('ctrl-s', '/'), [tab('search'), ['focus', '#search']])
 m.set(keydown('Escape'), [['blur']])
 

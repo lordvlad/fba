@@ -1,6 +1,8 @@
 /* global Headers, fetch */
 const cheerio = require('cheerio')
-const base = require('./cors-anywhere')
+
+const base = require('../lib/cors-anywhere')
+
 const url = `www.ebi.ac.uk/biomodels-main/search-models.do?cmd=TEXT:SEARCH`
 
 module.exports = function search (term) {

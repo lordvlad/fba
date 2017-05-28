@@ -16,7 +16,6 @@ const empty = html`
   </li>
 `
 
-
 module.exports = function searchView (state, emit) {
   let { busy, term, results } = state
   if (!term) term = ''
@@ -52,23 +51,27 @@ module.exports = function searchView (state, emit) {
 
   return html`
     <div>
-      <div class="vclInputGroupEmb">
-        <input type=search placeholder=search onkeyup=${setterm}
+      <div class=vclInputGroupEmb>
+        <input
+            type=search
+            placeholder=search
+            onkeyup=${setterm}
             class="vclInput vclNoBorder vclAppItem"
-            value=${term} id=search
+            value=${term}
+            id=search
             autocomplete=off />
         <div class="vclIcogram vlcTransparent vclSquare vclAppended ${hideSpinner}"
             style="right: 1.2em">
-          <div class="vclIcon fa fa-spinner fa-spin" aria-hidden="true" aria-label="Clear" role="img"></div>
+          <div class="vclIcon fa fa-spinner fa-spin" aria-hidden=true aria-label=Clear role=img></div>
         </div>
         <button class="vclButton vclTransparent vclSquare vclAppended ${hideEraser}" onclick=${clear}>
-          <div class="vclIcogram">
-            <div class="vclIcon fa fa-times-circle" aria-hidden="true" aria-label="Clear" role="img"></div>
+          <div class=vclIcogram>
+            <div class="vclIcon fa fa-times-circle" aria-hidden=true aria-label=Clear role=img></div>
           </div>
         </button>
       </div>
-      <nav class="vclNavigation vvclLayoutVertical vclLayoutFlex vclVertical">
-        <ul class="vclScrollable vclYOnHover">
+      <nav class="vclScrollable vclYOnHover vclNavigation vvclLayoutVertical vclLayoutFlex vclVertical">
+        <ul>
         ${busy ? loading : results ? results.map(result) : empty}
         </ul>
       </nav>

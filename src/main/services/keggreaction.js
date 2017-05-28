@@ -1,5 +1,5 @@
 /* global fetch */
-const base = require('./cors-anywhere')
+const base = require('../lib/cors-anywhere')
 const url = 'rest.kegg.jp'
 
 const split = (t) => t.split('\n')

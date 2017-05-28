@@ -1,6 +1,7 @@
-const MuxDemux = require('./mux')
-const WorkerDuplex = require('./WorkerDuplex')
 const { Observable } = require('rx-lite')
+
+const MuxDemux = require('../lib/mux')
+const WorkerDuplex = require('../lib/WorkerDuplex')
 
 const keggReaction = require('./keggreaction')
 const biomodels = require('./biomodels')

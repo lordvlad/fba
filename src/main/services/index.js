@@ -1,6 +1,8 @@
 const work = require('webworkify')
-const MuxDemux = require('./mux')
-const WorkerDuplex = require('./WorkerDuplex')
+
+const MuxDemux = require('../lib/mux')
+const WorkerDuplex = require('../lib/WorkerDuplex')
+
 const worker = work(require('./worker.js'))
 
 const mux = new MuxDemux()

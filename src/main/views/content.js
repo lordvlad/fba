@@ -1,5 +1,8 @@
 const html = require('choo/html')
 const draw = require('./draw')
+const cors = require('../lib/cors-anywhere')
+
+const exampleUrl = `${cors}/http://www.ebi.ac.uk/biomodels-main/download?mid=BIOMD0000000172`
 
 function modelView (model, emit) {
   const id = 'model_' + model.id
@@ -20,31 +23,27 @@ function modelView (model, emit) {
 }
 
 const callout = (inner) => html`
-  <div class="vclCallout vclInfo" style="margin: auto">${inner}</div>
+  <div class="measure pa4 mt4 bg-lightest-blue center v-mid">${inner}</div>
 `
 
-const noModel = html`
-  <div>
-    Start creating a metabolic network by
-    <ul>
-      <li>Drag and drop an SBML file anywhere on the page</li>
-      <li>Go through the file menu to open an SBML file</li>
-      <li>Open the search tab and drag and drop reactions onto the page</li>
-    </ul>
-  </div>
-`
+module.exports = function contentView ({content}, emit) {
+  const example = () => emit('file:open:url', exampleUrl)
 
-module.exports = function contentView (appstate, emit) {
-  const { content } = appstate
-  const { model } = content || {}
-  return html`
-    <div class="v-top dib h-100">
-      content
+  const noModel = html`
+    <div class="pa0 ma0">
+      Start creating a metabolic network by
+      <ul>
+        <li>Drag and drop an SBML file anywhere on the page</li>
+        <li>Go through the file menu to open an SBML file</li>
+        <li>Open the search tab and drag and drop reactions onto the page</li>
+        <li>Open an <a href=# onclick=${example}>example model</a></li>
+      </ul>
     </div>
   `
-  // return html`
-  //   <div style="overflow: hidden; width: 100%" class="vclCenter vclMiddle vclLayoutCenter vclLayoutHorizontal">
-  //     ${!model ? callout(noModel) : model.error ? callout(model.error) : modelView(model, emit)}
-  //   </div>
-  // `
+  const { model } = content || {}
+  return html`
+    <div class="overflow-hidden w-100 v-top dib h-100">
+      ${!model ? callout(noModel) : model.error ? callout(model.error) : modelView(model, emit)}
+    </div>
+  `
 }

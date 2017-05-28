@@ -3,8 +3,10 @@ const fill = require('ndarray-fill')
 const traverse = require('traverse')
 const { assign } = require('ndarray-ops')
 
-const { simplex } = require('./optimize')
 const { Model, Species, Reaction, Unit, Compartment } = require('../model')
+
+const { simplex } = require('./optimize')
+
 const proto = (o, c) => Object.setPrototypeOf(o, c.prototype)
 const deleteThis = new Set()
 ;['graph', 'group', 'transform', 'pool'].forEach((x) => deleteThis.add(x))

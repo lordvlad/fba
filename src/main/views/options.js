@@ -1,14 +1,10 @@
 const html = require('choo/html')
-const { li } = require('./util')
+const li = require('./li')
 
 module.exports = function optionsView (state, send) {
   return html`
-    <div>
-      <nav class="vclNavigation vclLayoutVertical vclLayoutFlex vclVertical">
-        <ul>
-          ${li('todo')}
-        </ul>
-      </nav>
-    </div>
+    <ul class="list pa0 ma0">
+      ${li('todo', 'question')}
+    </ul>
     `
 }
