@@ -2,8 +2,7 @@ const ndarray = require('ndarray')
 const fill = require('ndarray-fill')
 const traverse = require('traverse')
 const { assign } = require('ndarray-ops')
-
-const { Model, Species, Reaction, Unit, Compartment } = require('../model')
+const { Model, Species, Reaction, Unit, Compartment } = require('jssbml')
 
 const { simplex } = require('./optimize')
 
