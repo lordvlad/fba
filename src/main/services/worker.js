@@ -1,20 +1,25 @@
-const { Observable } = require('rx-lite')
-
-const MuxDemux = require('../lib/mux')
-const WorkerDuplex = require('../lib/WorkerDuplex')
-
-const keggReaction = require('./keggreaction')
-const biomodels = require('./biomodels')
-
 module.exports = function (self) {
-  let logger = null
+  const { Observable } = require('rx-lite')
+  const { createReader, createBuilder } = require('jssbml')
+
+  const MuxDemux = require('../lib/mux')
+  const WorkerDuplex = require('../lib/WorkerDuplex')
+
+  const keggReaction = require('./keggreaction')
+  const biomodels = require('./biomodels')
+
   const logit = (msg) => logger && logger.write(msg)
   const mux = new MuxDemux()
+
+  let logger = null
 
   mux.pipe(new WorkerDuplex(self)).pipe(mux)
 
   function sbml (stream) {
-    stream.pipe(require('./sbml')()).pipe(stream)
+    stream
+      .pipe(createReader())
+      .pipe(createBuilder())
+      .pipe(stream)
   }
 
   function log (stream) {

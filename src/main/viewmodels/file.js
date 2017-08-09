@@ -1,9 +1,8 @@
 /* global fetch, prompt */
 const frs = require('filereader-stream')
+const { Model } = require('jssbml')
 
 const service = require('../services')
-const { pipewrap } = require('../lib/util')
-const { Model, revive } = require('../model')
 const filePicker = require('../lib/file-picker')
 const { biomodelsUrl } = require('../lib/biomodels')
 
@@ -20,7 +19,7 @@ module.exports = function () {
 
     const reader = () => {
       const r = service.createStream('sbml')
-      r.pipe(pipewrap(revive)).on('data', set)
+      r.on('data', set)
       return r
     }
 
