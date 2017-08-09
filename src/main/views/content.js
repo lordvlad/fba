@@ -21,10 +21,10 @@ module.exports = function contentView ({content}, emit) {
       </ul>
     </div>
   `
-  const { model } = content || {}
+  const hasModel = !!content.model
   return html`
     <div class="overflow-hidden w-100 v-top dib h-100">
-      ${!model ? callout(noModel) : model.error ? callout(model.error) : modelView(model, emit)}
+      ${hasModel ? modelView(content) : callout(noModel)}
     </div>
   `
 }

@@ -1,6 +1,8 @@
 const cytoscape = require('cytoscape')
 const cycola = require('cytoscape-cola')
+const panzoom = require('cytoscape-panzoom')
 const Color = require('color')
+const css = require('sheetify')
 
 const values = Object.values
 
@@ -11,7 +13,18 @@ const orange = Color('#f3b70a')
 const brick = Color('#f56169')
 const locked = true
 
-cycola(cytoscape) // register the cytoscape cola extension
+// register panzoom extension to use maps-like
+// zoom and navigation controls
+panzoom(cytoscape, require('jquery'))
+css('cytoscape-panzoom')
+css`
+  .cy-panzoom { right: 0; margin-right: 50px; opacity: .2; }
+  .cy-panzoom:hover { opacity: 1; }
+`
+
+// register the cytoscape cola extension
+// this allows us to use cola.js for force layouts
+cycola(cytoscape)
 
 const style = [
   {
@@ -54,7 +67,11 @@ const style = [
 ]
 const layout = { name: 'preset' }
 
-module.exports = function (model, container) {
+module.exports = function (container, options) {
+  const model = options.model
+  const on = (...args) => options.on(...args)
+  const emit = (...args) => options.emit(...args)
+
   const nodes = []
   const edges = []
   const compartmentMap = new Map()
@@ -126,11 +143,33 @@ module.exports = function (model, container) {
   const elements = window.elements = {nodes, edges}
   const c = window.cy = cytoscape({ container, elements, style, layout })
 
-  // auto layout reaction positions
-  c.elements('node[position.x] == undefined').layout({
+  on('*', (k, ...args) => console.log(k, ...args))
+
+  on('panZoomControls', (on) => {
+    const ctrl = document.querySelector('.cy-panzoom')
+    if (on) {
+      if (!ctrl) return c.panZoom({})
+      ctrl.style.display = 'block'
+    } else {
+      ctrl.style.display = 'none'
+    }
+  })
+
+  on('lock', (lock) => {
+    c.autolock(lock)
+    c.autoungrabify(lock)
+    c.autounselectify(lock)
+  })
+
+  // auto layout nodes which don't have a position set
+  c.elements('node[!position]').layout({
     name: 'cola',
     fit: false,
-    unconstrIter: 20,
+    unconstrIter: 40,
+    randomize: true,
     stop () { c.elements().unlock() }
   }).run()
+
+  if (options.panZoomControls) emit('panZoomControls', true)
+  if (options.lock) emit('lock', true)
 }

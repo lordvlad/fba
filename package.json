@@ -78,7 +78,10 @@
     "color": "^2.0.0",
     "cytoscape": "^3.1.4",
     "cytoscape-cola": "^1.6.0",
+    "cytoscape-panzoom": "^2.5.2",
+    "jquery": "^3.2.1",
     "jssbml": "0.0.1",
+    "nanobus": "^4.2.0",
     "nanocomponent": "^6.0.0"
   }
 }
