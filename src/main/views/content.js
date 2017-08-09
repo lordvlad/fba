@@ -1,23 +1,6 @@
 const html = require('choo/html')
-const draw = require('./draw')
 
-function modelView (model, emit) {
-  const id = 'model_' + model.id
-  let done = false
-  const load = () => setTimeout(() => {
-    if (done) return
-    done = true
-    draw(model, document.body.querySelector(`#${id}`))
-  }, 1000)
-  const style = 'height:100%; width:100%'
-  const node = html`<div id=${id} class=graph style=${style} onload=${load}></div>`
-  node.isSameNode = function (o) {
-    const r = o && o.nodeName && o.id === this.id
-    if (!r) load()
-    return r
-  }
-  return node
-}
+const modelView = require('./model')
 
 const callout = (inner) => html`
   <div class="measure pa4 mt4 bg-lightest-blue center v-mid">${inner}</div>
@@ -25,6 +8,7 @@ const callout = (inner) => html`
 
 module.exports = function contentView ({content}, emit) {
   const example = () => emit('file:open:biomodelsid', content.exampleId)
+  const example1 = () => emit('file:open:url', content.exampleUrl)
 
   const noModel = html`
     <div class="pa0 ma0">
@@ -32,7 +16,8 @@ module.exports = function contentView ({content}, emit) {
       <ul>
         <li>Drag and drop an SBML file anywhere on the page</li>
         <li>Go through the file menu to open an SBML file</li>
-        <li>Open an <a href=# onclick=${example}>example model</a></li>
+        <li>Open an <a href=# title=${content.exampleID} onclick=${example}>example model from biomodels</a></li>
+        <li>Open an <a href=# title=${content.exampleUrl} onclick=${example1}>example model from a URL</a></li>
       </ul>
     </div>
   `
