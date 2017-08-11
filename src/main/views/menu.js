@@ -12,7 +12,6 @@ const notificationStyle = css`:host { position: absolute; margin-top: 1px; }`
 
 module.exports = function menuView ({menu, content, console}, emit) {
   const select = (what) => (e) => emit('menu:active', what)
-  const toggleConsole = (e) => emit('console:toggle')
 
   const tab = ({
     file: () => fileView(menu.file, emit),
@@ -41,12 +40,12 @@ module.exports = function menuView ({menu, content, console}, emit) {
   return html`
     <div class="pa0 ma0 h-100 flex flex-row">
       <div class="pa0 ma0 h-100 bg-black-80">
-        <ul class="list pa0 ma0">
+        <ul class="list pa0 ma0 h-100 flex flex-column">
           ${lii('file', 'file-o', select('file'))}
           ${lii('network', 'code-fork', select('network'), !content.model)}
           ${lii('calculate', 'calculator', select('calculate'), !content.model)}
+          <li class="self-stretch" style="flex-grow: 100"> </li>
           ${lii('options', 'wrench', select('options'))}
-          ${lii('console', 'terminal', toggleConsole, false, notification)}
         </ul>
       </div>
       <div class="${width} pa0 ma0 h-100 bg-black-60">
