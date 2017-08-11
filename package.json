@@ -9,7 +9,7 @@
     "report": "nyc report --reporter=text-lcov | coveralls",
     "start-debug": "bankai -c [ -u sheetify-cssnext ] -d -p 9966 -y false -u false start src/main/index",
     "start": "bankai -c [ -u sheetify-cssnext ] -p 9966 -u false start src/main/index",
-    "build": "bankai -c [ -u sheetify-cssnext ] -u false build src/main/index dist/",
+    "build": "bankai -c [ -u sheetify-cssnext ] build src/main/index dist/",
     "deploy": "surge -p dist -d flux.surge.sh"
   },
   "keywords": [],
