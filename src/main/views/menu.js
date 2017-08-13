@@ -8,7 +8,6 @@ const calcView = require('./calc')
 const optionsView = require('./options')
 
 const width = css`:host > ul { width: 16em }`
-const notificationStyle = css`:host { position: absolute; margin-top: 1px; }`
 
 module.exports = function menuView ({menu, content, console}, emit) {
   const select = (what) => (e) => emit('menu:active', what)
@@ -31,12 +30,6 @@ module.exports = function menuView ({menu, content, console}, emit) {
     children
   })
 
-  let notification
-  if (console.notification) {
-    notification = [html`
-      <i class="fa fa-exclamation red ${notificationStyle}"></i>
-    `]
-  }
   return html`
     <div class="pa0 ma0 h-100 flex flex-row">
       <div class="pa0 ma0 h-100 bg-black-80">
