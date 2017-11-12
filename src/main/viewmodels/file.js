@@ -1,8 +1,8 @@
 /* global fetch, prompt */
 const frs = require('filereader-stream')
+const through = require('through2')
 const { Model } = require('jssbml')
 
-const service = require('../services')
 const filePicker = require('../lib/file-picker')
 const { biomodelsUrl } = require('../lib/biomodels')
 
@@ -12,18 +12,17 @@ module.exports = function () {
     const on = emitter.on.bind(emitter)
     const render = () => emitter.emit('render')
 
-    const set = (m) => {
-      emit('model:set', m)
-      emit('progress:done')
+    function reader () {
+      const t = through(function (chunk) {
+        emitter.emit('sbml:parse', chunk)
+      })
+      return t
     }
 
-    const reader = () => {
-      const r = service.createStream('sbml')
-      r.on('data', set)
-      return r
-    }
+    on('sbml_response:parse:done', (m) => emit('model:set', m))
 
     on('model:set', (model) => {
+      emit('progress:done')
       emit('log:info', `loaded model '${model.id}'`)
       state.content.model = model
       render()

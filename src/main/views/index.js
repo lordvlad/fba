@@ -3,7 +3,6 @@ const css = require('sheetify')
 
 const menuView = require('./menu')
 const contentView = require('./content')
-const consoleView = require('./console')
 
 css`
   html { height:100%; }
@@ -26,7 +25,6 @@ module.exports = function mainView (state, emit) {
           ${menuView(state, emit)}
           ${contentView(state, emit)}
         </div>
-        ${consoleView(state, emit)}
       </div>
     </body>
   `
