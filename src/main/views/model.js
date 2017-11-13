@@ -24,7 +24,7 @@ class ModelView extends Nanocomponent {
 
   setState (state = {}) {
     for (let [key, val] of Object.entries(state)) {
-      if (this.state[key] === state.key) continue
+      if (this.state[key] === state[key]) continue
       this.state[key] = val
       this.state.emit(key, val)
     }
