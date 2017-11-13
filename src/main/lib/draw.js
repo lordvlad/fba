@@ -77,8 +77,6 @@ module.exports = function (container, options) {
   const compartmentMap = new Map()
   const sbmlLayout = model.annotation.layouts[0]
 
-  console.log(window.sbmlLayout = sbmlLayout)
-
   for (let data of values(sbmlLayout.compartmentGlyphs)) {
     compartmentMap.set(data.compartment.id, data.id)
     if (data.compartment.outside) {
@@ -148,7 +146,7 @@ module.exports = function (container, options) {
   on('panZoomControls', (on) => {
     const ctrl = document.querySelector('.cy-panzoom')
     if (on) {
-      if (!ctrl) return c.panZoom({})
+      if (!ctrl) return c.panzoom({})
       ctrl.style.display = 'block'
     } else {
       ctrl.style.display = 'none'
