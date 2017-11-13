@@ -9,14 +9,15 @@ const optionsView = require('./options')
 
 const width = css`:host > ul { width: 16em }`
 
-module.exports = function menuView ({menu, content, console}, emit) {
+module.exports = function menuView (state, emit) {
   const select = (what) => (e) => emit('menu:active', what)
+  const {content, menu} = state
 
   const tab = ({
-    file: () => fileView(menu.file, emit),
-    network: () => networkView(menu.network, emit),
-    calculate: () => calcView(menu.calculate, emit),
-    options: () => optionsView(menu.options, emit),
+    file: () => fileView(state, emit),
+    network: () => networkView(state, emit),
+    calculate: () => calcView(state, emit),
+    options: () => optionsView(state, emit),
     [null]: () => ''
   })[menu.active]()
 

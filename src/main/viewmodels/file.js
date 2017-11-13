@@ -28,6 +28,11 @@ module.exports = function () {
       render()
     })
 
+    on('model:close', () => {
+      satte.content.model = null
+      render()
+    })
+
     on('model:new', () => {
       emit('model:set', new Model())
       render()
