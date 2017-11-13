@@ -29,7 +29,7 @@ module.exports = function () {
     })
 
     on('model:close', () => {
-      satte.content.model = null
+      state.content.model = null
       render()
     })
 
