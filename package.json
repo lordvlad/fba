@@ -28,6 +28,7 @@
     "cheerio": "^1.0.0-rc.1",
     "choo": "^6.5.1",
     "choo-devtools": "^2.1.0",
+    "choo-persist": "^3.0.2",
     "color": "^2.0.1",
     "coveralls": "^3.0.0",
     "cwise": "^1.0.9",

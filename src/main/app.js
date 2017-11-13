@@ -1,5 +1,6 @@
 const choo = require('choo')
 const devtools = require('choo-devtools')
+const persist = require('choo-persist')
 const {join} = require('path')
 
 const mainView = require('./views')
@@ -16,6 +17,7 @@ const hotkeys = require('./viewmodels/hotkeys')
 
 const app = module.exports = choo()
 app.use(devtools())
+app.use(persist())
 
 app.route('/', mainView)
 
