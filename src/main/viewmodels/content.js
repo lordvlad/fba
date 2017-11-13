@@ -4,6 +4,7 @@ const exampleUrl = cors + '/http://otto.bioquant.uni-heidelberg.de/sbml/level2/2
 
 module.exports = function () {
   return function (state, emitter) {
+    const render = () => emitter.emit('render')
     state.content = {
       exampleId,
       exampleUrl
@@ -11,10 +12,16 @@ module.exports = function () {
 
     function lock (toggle) {
       state.content.lock = toggle
-      emitter.emit('render')
+      render()
+    }
+
+    function panZoomControls (toggle) {
+      state.content.panZoomControls = toggle
+      render()
     }
 
     emitter.on('model:unlock', () => lock(false))
     emitter.on('model:lock', (toggle = true) => lock(toggle))
+    emitter.on('model:panZoomControls', (toggle = true) => panZoomControls(toggle))
   }
 }
