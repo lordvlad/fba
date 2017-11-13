@@ -4,7 +4,7 @@ const nanobus = require('nanobus')
 
 const draw = require('../lib/draw')
 
-module.exports = class ModelView extends Nanocomponent {
+module.exports = class ModelComponent extends Nanocomponent {
   constructor () {
     super()
     this.state = nanobus()
@@ -33,4 +33,5 @@ module.exports = class ModelView extends Nanocomponent {
   draw () { draw(this.element, this.state) }
   load () { this.draw() }
   afterupdate () { this.draw() }
+  emit (...args) { this.state.emit(...args) }
 }
