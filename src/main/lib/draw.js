@@ -1,6 +1,7 @@
 const cytoscape = require('cytoscape')
 const cycola = require('cytoscape-cola')
 const panzoom = require('cytoscape-panzoom')
+const undoredo = require('cytoscape-undo-redo')
 const Color = require('color')
 const css = require('sheetify')
 
@@ -30,6 +31,9 @@ css`
 // register the cytoscape cola extension
 // this allows us to use cola.js for force layouts
 cycola(cytoscape)
+
+// register undoredo with cytoscape
+undoredo(cytoscape)
 
 const style = [
   {
@@ -72,10 +76,11 @@ const style = [
 ]
 const layout = { name: 'preset' }
 
-module.exports = function (container, options) {
-  const model = options.model
-  const on = (...args) => options.on(...args)
-  const emit = (...args) => options.emit(...args)
+module.exports = function ({container, events, state, setState}) {
+  const {model} = state
+  const on = (...args) => events.on(...args)
+  const emit = (...args) => events.emit(...args)
+  const render = () => emit('render')
 
   const nodes = []
   const edges = []
@@ -145,10 +150,22 @@ module.exports = function (container, options) {
 
   const elements = window.elements = {nodes, edges}
   const c = window.cy = cytoscape({ container, elements, style, layout })
+  const history = c.undoRedo()
 
-  on('*', (k, ...args) => console.log(k, ...args))
+  on('do_undo', () => {
+    history.undo()
+    setState({redoable: true, undoable: !history.isUndoStackEmpty()})
+    render()
+  })
 
-  on('panZoomControls', (on) => {
+
+  on('do_redo', () => {
+    history.redo()
+    setState({undoable: true, redoable: !history.isRedoStackEmpty()})
+    render()
+  })
+
+  on('pan', (on) => {
     const ctrl = document.querySelector('.cy-panzoom')
     if (on) {
       if (!ctrl) return c.panzoom({})
@@ -156,12 +173,19 @@ module.exports = function (container, options) {
     } else {
       ctrl.style.display = 'none'
     }
+    render()
   })
 
   on('lock', (lock) => {
     c.autolock(lock)
     c.autoungrabify(lock)
     c.autounselectify(lock)
+    render()
+  })
+
+  c.once('afterDo', () => {
+    setState({undoable: !history.isUndoStackEmpty()})
+    render()
   })
 
   // auto layout nodes which don't have a position set
@@ -173,6 +197,9 @@ module.exports = function (container, options) {
     stop () { c.elements().unlock() }
   }).run()
 
-  if (options.panZoomControls) emit('panZoomControls', true)
-  if (options.lock) emit('lock', true)
+  setState({
+    undoable: !history.isUndoStackEmpty(),
+    redoable: !history.isRedoStackEmpty()
+  })
+  render()
 }

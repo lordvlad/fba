@@ -7,19 +7,5 @@ module.exports = function () {
     const render = () => emitter.emit('render')
 
     if (!state.content) state.content = { exampleId, exampleUrl }
-
-    function lock (toggle) {
-      state.content.lock = toggle
-      render()
-    }
-
-    function panZoomControls (toggle) {
-      state.content.panZoomControls = toggle
-      render()
-    }
-
-    emitter.on('model:unlock', () => lock(false))
-    emitter.on('model:lock', (toggle = true) => lock(toggle))
-    emitter.on('model:panZoomControls', (toggle = true) => panZoomControls(toggle))
   }
 }

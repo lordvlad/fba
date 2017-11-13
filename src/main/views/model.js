@@ -1,5 +1,6 @@
 const html = require('choo/html')
 const css = require('sheetify')
+const xtend = require('xtend')
 
 const ModelComponent = require('../components/model')
 const { killEvent } = require('../lib/util')
@@ -12,6 +13,11 @@ const constStyle = css`
     transition: color .15s ease-in;
   }
 `
+const disabledLink = css`
+  :host {
+    cursor: default;
+  }
+ `
 
 const callout = (inner) => html`
   <div class="measure pa4 mt4 bg-lightest-blue center v-mid">${inner}</div>
@@ -19,21 +25,21 @@ const callout = (inner) => html`
 
 const notImpl = () => console.log('not implemented')
 const noop = () => {}
-const li = ({title = 'blub', icon = 'angle-right', onclick = notImpl, styles = ''}) => html`
-  <li class="pa3 pr0 ${styles} ${constStyle} dib hover-black black-40"
+const li = ({title = 'blub', icon = 'angle-right', onclick = notImpl, styles = '', flip = false, disabled = false}) => html`
+  <li class="pa3 pr0 ${styles} ${disabled ? '' : constStyle} dib hover-black black-40 ${disabled ? 'hover-black-40' : ''}"
       role=presentation
       title=${title}
-      onclick=${(e) => { killEvent(e); onclick(e) }}>
+      onclick=${disabled ? noop : (e) => { killEvent(e); onclick(e) }}>
     <a title=${title}
         href=#
         tabindex=0
-        class="link"
-        onclick=${(e) => { killEvent(e); onclick(e) }}>
-      <i class="fa fa-fw fa-${icon}"></i>
+        class="link ${disabled ? disabledLink : ''}"
+        onclick=${disabled ? noop : (e) => { killEvent(e); onclick(e) }}>
+      <i class="fa fa-fw fa-${icon} ${flip ? 'fa-flip-horizontal' : ''}"></i>
     </a>
   </li>
 `
-const lii = (icon, title, onclick) => li({icon, title, onclick})
+const lii = (icon, title, onclick, disabled = false, flip = false) => li({icon, title, onclick, flip, disabled})
 
 
 module.exports = function contentView ({content}, emit) {
@@ -54,15 +60,16 @@ module.exports = function contentView ({content}, emit) {
     `)
   }
 
-  const {lock, panZoomControls: pan} = content
-  const toggleLock = () => emit('model:lock', !lock)
-  const togglePan = () => emit('model:panZoomControls', !pan)
+  const { undoable, redoable, lock, pan } = modelComponent.state
+  modelComponent.bubbleUp = () => emit('render')
 
   return html`
     <div class="w-100 h-100">
       <ul class="w-100 list dib pa0 ma0">
-        ${lii(lock ? 'lock' : 'unlock', `${lock ? 'unlock' : 'lock'} positions`, toggleLock)}
-        ${lii(pan ? 'hand-paper-o' : 'arrows', `${pan ? 'disable' : 'enable'} pan and zoom controls`, togglePan)}
+        ${lii('undo', 'undo', () => modelComponent.undo(), !undoable)}
+        ${lii('undo', 'redo', () => modelComponent.redo(), !redoable, true)}
+        ${lii(lock ? 'lock' : 'unlock', `${lock ? 'unlock' : 'lock'} positions`, () => modelComponent.toggleLock())}
+        ${lii(pan ? 'hand-paper-o' : 'arrows', `${pan ? 'disable' : 'enable'} pan and zoom controls`, () => modelComponent.togglePan())}
       </ul>
       ${modelComponent.render(content)}
     </div>
