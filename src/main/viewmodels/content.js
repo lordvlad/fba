@@ -5,10 +5,8 @@ const exampleUrl = cors + '/http://otto.bioquant.uni-heidelberg.de/sbml/level2/2
 module.exports = function () {
   return function (state, emitter) {
     const render = () => emitter.emit('render')
-    state.content = {
-      exampleId,
-      exampleUrl
-    }
+
+    if (!state.content) state.content = { exampleId, exampleUrl }
 
     function lock (toggle) {
       state.content.lock = toggle
