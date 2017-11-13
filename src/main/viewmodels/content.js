@@ -9,13 +9,12 @@ module.exports = function () {
       exampleUrl
     }
 
-    emitter.on('model:unlock', () => {
-      state.content.lock = false
+    function lock (toggle) {
+      state.content.lock = toggle
       emitter.emit('render')
-    })
-    emitter.on('model:lock', () => {
-      state.content.lock = true
-      emitter.emit('render')
-    })
+    }
+
+    emitter.on('model:unlock', () => lock(false))
+    emitter.on('model:lock', (toggle = true) => lock(toggle))
   }
 }
