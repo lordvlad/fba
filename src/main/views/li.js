@@ -16,6 +16,7 @@ const li = ({title = 'blub', icon = 'angle-right', onclick = notImpl, selected =
   <li class="pa3 ${styles}
         ${disabled ? 'white-60 disabled' : `hover-black hover-bg-white-80 white ${constStyle}`}
         ${selected ? 'bg-white-80 black-20' : ''}"
+      title=${title}
       role=presentation
       onclick=${disabled ? noop : (e) => { killEvent(e); onclick(e) }}
       aria-selected=${selected}>

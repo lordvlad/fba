@@ -22,6 +22,7 @@ const noop = () => {}
 const li = ({title = 'blub', icon = 'angle-right', onclick = notImpl, styles = ''}) => html`
   <li class="pa3 pr0 ${styles} ${constStyle} dib hover-black black-40"
       role=presentation
+      title=${title}
       onclick=${(e) => { killEvent(e); onclick(e) }}>
     <a title=${title}
         href=#
