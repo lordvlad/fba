@@ -9,7 +9,7 @@ const modelComponent = new ModelComponent()
 const constStyle = css`
   :host {
     cursor: pointer;
-    transition: background-color .15s ease-in;
+    transition: color .15s ease-in;
   }
 `
 
@@ -20,7 +20,7 @@ const callout = (inner) => html`
 const notImpl = () => console.log('not implemented')
 const noop = () => {}
 const li = ({title = 'blub', icon = 'angle-right', onclick = notImpl, styles = ''}) => html`
-  <li class="pa1 ${styles} ${constStyle} dib hover-black black-60"
+  <li class="pa3 pr0 ${styles} ${constStyle} dib hover-black black-40"
       role=presentation
       onclick=${(e) => { killEvent(e); onclick(e) }}>
     <a title=${title}

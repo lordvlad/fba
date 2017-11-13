@@ -18,7 +18,12 @@ const locked = true
 panzoom(cytoscape, require('jquery'))
 css('cytoscape-panzoom')
 css`
-  .cy-panzoom { right: 0; margin-right: 50px; opacity: .2; }
+  .cy-panzoom {
+    right: 0;
+    margin-right: 50px;
+    opacity: .4;
+    transition: opacity .15s ease-in;
+  }
   .cy-panzoom:hover { opacity: 1; }
 `
 
