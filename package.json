@@ -8,7 +8,7 @@
     "test": "nyc ava",
     "report": "nyc report --reporter=text-lcov | coveralls",
     "start": "bankai start src/main/index",
-    "build": "bankai build src/main/index",
+    "build": "bankai build src/main/index && put src/main/index/dist dist",
     "deploy": "surge -p dist -d flux.surge.sh"
   },
   "sheetify": {
@@ -56,7 +56,7 @@
     "morphdom": "^2.2.1",
     "multipipe": "^1.0.2",
     "mux-demux": "^3.7.9",
-    "nanobus": "^4.3.0",
+    "nanobus": "^4.3.1",
     "nanocomponent": "^6.4.2",
     "ndarray": "^1.0.18",
     "ndarray-fill": "^1.0.1",
@@ -68,6 +68,7 @@
     "nprogress": "^0.2.0",
     "nyc": "^11.3.0",
     "object-assign": "^4.1.0",
+    "put-cli": "^0.1.0",
     "sax": "^1.2.4",
     "setprototypeof": "^1.1.0",
     "sheetify-cssnext": "^1.0.7",
