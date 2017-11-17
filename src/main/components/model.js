@@ -1,56 +1,243 @@
-const html = require('choo/html')
+const undoredo = require('cytoscape-undo-redo')
 const Nanocomponent = require('nanocomponent')
-const nanobus = require('nanobus')
-const xtend = require('xtend')
+const panzoom = require('cytoscape-panzoom')
+const cycola = require('cytoscape-cola')
+const cytoscape = require('cytoscape')
+const morph = require('xtend/mutable')
+const html = require('choo/html')
+const css = require('sheetify')
+const Color = require('color')
 
-const draw = require('../lib/draw')
+const values = Object.values
+const select = (s) => document.querySelector(s)
+
+// const purple = Color('#b470d6')
+const eggshell = Color('#f4f2f4')
+const blue = Color('#4bc5cf')
+// const orange = Color('#f3b70a')
+const brick = Color('#f56169')
+const locked = true
+
+// register panzoom extension to use maps-like
+// zoom and navigation controls
+panzoom(cytoscape, require('jquery'))
+css('cytoscape-panzoom')
+css`
+  .cy-panzoom {
+    right: 0;
+    margin-right: 50px;
+    opacity: .4;
+    transition: opacity .15s ease-in;
+  }
+  .cy-panzoom:hover { opacity: 1; }
+`
+
+// register the cytoscape cola extension
+// this allows us to use cola.js for force layouts
+cycola(cytoscape)
+
+// register undoredo with cytoscape
+undoredo(cytoscape)
+
+const style = [
+  {
+    selector: 'node',
+    style: {
+      'height': (e) => e.data('boundingBox') ? e.data('boundingBox').height : 10,
+      'width': (e) => e.data('boundingBox') ? e.data('boundingBox').width : 10
+    }
+  },
+  {
+    selector: '.species',
+    style: {
+      shape: 'ellipse',
+      content: 'data(id)',
+      'background-color': blue.string(),
+      'border-color': blue.darken(0.5).string(),
+      'border-width': 2
+    }
+  },
+  {
+    selector: '.reaction',
+    style: {
+      shape: 'rectangle',
+      'background-color': brick.string(),
+      'border-color': brick.darken(0.5).string(),
+      'border-width': 2,
+      content: 'data(id)'
+    }
+  },
+  {
+    selector: '.compartment',
+    style: {
+      shape: 'roundrectangle',
+      'background-color': eggshell.string(),
+      'border-color': eggshell.darken(0.5).string(),
+      'border-width': 2,
+      content: 'data(id)'
+    }
+  }
+]
+const layout = { name: 'preset' }
 
 module.exports = class ModelComponent extends Nanocomponent {
-  constructor () {
+  constructor (emitter) {
     super()
-    this.bus = nanobus()
-    this.style = 'height:100%; widht:100%'
     this.state = {}
-    this.state.model = null
-    this.state.undoable = false
-    this.state.redoable = false
-    this.state.pan = false
-    this.state.lock = false
-    this.bus.on('render', () => {
-      if (this.bubbleUp) this.bubbleUp()
-    })
-  }
-  toggleLock () { this.setState({lock: !this.state.lock}) }
-  togglePan () { this.setState({pan: !this.state.pan}) }
-  undo() { this.bus.emit('do_undo') }
-  redo() { this.bus.emit('do_redo') }
-
-  createElement (state = {}) {
-    this.setState(state)
-    return html`<div class=graph style=${this.style}></div>`
+    this.bubbleUp = () => emitter.emit('render')
+    this.guardMethods()
+    emitter.on('model:pan:toggle', this.togglePan)
+    emitter.on('model:lock:toggle', this.toggleLock)
+    emitter.on('model:history:undo', this.undo)
+    emitter.on('model:history:redo', this.redo)
   }
 
-  update (state = {}) {
-    if (state.model !== this.state.model) return true
-    this.setState(state)
-  }
+  // draw graph after node is mounted or full update is needed
+  load () { this.drawGraph() }
+  afterupdate () { this.drawGraph() }
 
-  setState (state = {}) {
-    for (let [key, val] of Object.entries(state)) {
-      if (this.state[key] === state[key]) continue
-      this.state[key] = val
-      this.bus.emit(key, val)
+  guardMethods () {
+    const guard = (fn) => (...args) => this.state.model && fn.apply(this, args)
+    for (let m of ['togglePan', 'toggleLock', 'undo', 'redo']) {
+      this[m] = guard(this[m])
     }
   }
 
-  draw () {
-    draw({
-      container: this.element,
-      events: this.bus,
-      state: this.state,
-      setState: (s) => this.setState(s)
-    })
+  createElement (props = {}) {
+    // cache props, we'll need them once we'll draw the model
+    morph(this.state, props)
+    return html`<div class="graph overflow-hidden w-100 v-top dib h-100"></div>`
   }
-  load () { this.draw() }
-  afterupdate () { this.draw() }
+
+  // if model is different, redraw completely
+  update (props = {}) {
+    const redraw = typeof props.model !== 'undefined' && props.model !== this.state.model
+    morph(this.state, props)
+    return redraw
+  }
+
+  layout () {
+    // auto layout nodes which don't have a position set
+    const c = this.c
+    c.elements('node[!position]').layout({
+      name: 'cola',
+      fit: false,
+      unconstrIter: 40,
+      randomize: true,
+      stop () { c.elements().unlock() }
+    }).run()
+  }
+
+  togglePan (on) {
+    this.state.pan = on
+    const ctrl = select('.cy-panzoom')
+    if (on) {
+      if (!ctrl) this.c.panzoom({})
+      else ctrl.style.display = 'block'
+    } else if (ctrl) {
+      ctrl.style.display = 'none'
+    }
+  }
+
+  toggleLock (on) {
+    this.state.lock = on
+    this.c.autolock(on)
+    this.c.autoungrabify(on)
+    this.c.autounselectify(on)
+  }
+
+  undo () {
+    this.history.undo()
+  }
+
+  redo () {
+    this.history.redo()
+  }
+
+  drawGraph () {
+    if (!this.state.model) return
+
+    const elements = this.shapeData()
+    this.c = cytoscape({ container: this.element, elements, style, layout })
+
+    this.history = this.c.undoRedo()
+    this.history.reset(this.state.undos, this.state.redos)
+    this.c.on('afterDo', this.bubbleUp)
+    this.c.on('afterUndo', this.bubbleUp)
+    this.c.on('afterRedo', this.bubbleUp)
+
+    this.togglePan(this.state.pan)
+    this.toggleLock(this.state.lock)
+    this.layout()
+  }
+
+  shapeData () {
+    const model = this.state.model
+    const nodes = []
+    const edges = []
+    const compartmentMap = new Map()
+    const sbmlLayout = model.annotation.layouts[0]
+    for (let data of values(sbmlLayout.compartmentGlyphs)) {
+      compartmentMap.set(data.compartment.id, data.id)
+      if (data.compartment.outside) {
+        data.parent = compartmentMap.get(data.compartment.outside.id)
+      }
+      const classes = 'compartment'
+      const position = {
+        x: data.boundingBox.x + data.boundingBox.width / 2,
+        y: data.boundingBox.y + data.boundingBox.height / 2
+      }
+      nodes.push({ data, position, classes, locked })
+    }
+
+    for (let data of values(sbmlLayout.speciesGlyphs)) {
+      if (data.species.compartment) {
+        data.parent = compartmentMap.get(data.species.compartment.id)
+      }
+      const classes = 'species'
+      const position = {
+        x: data.boundingBox.x + data.boundingBox.width / 2,
+        y: data.boundingBox.y + data.boundingBox.height / 2
+      }
+      nodes.push({ data, position, classes, locked })
+    }
+
+    for (let data of values(sbmlLayout.reactionGlyphs)) {
+      const classes = 'reaction'
+      let compartmentA = null
+      let compartmentB = null
+      let isTransport = false
+
+      for (let s of data.speciesReferenceGlyphs) {
+        // find out if the reaction is a transport
+        if (!isTransport) {
+          // check all encountered compartments and see if they are all the same
+          if (!compartmentA) {
+            compartmentA = s.speciesGlyph.species.compartment
+          } else if (compartmentA !== s.speciesGlyph.species.compartment) {
+            compartmentB = s.speciesGlyph.species.compartment
+            isTransport = true
+          }
+        }
+
+        // determine role and set source and target nodes accordingly
+        const x = s.role === 'substrate'
+        s.source = x ? s.speciesGlyph.id : data.id
+        s.target = !x ? s.speciesGlyph.id : data.id
+        edges.push({ data: s })
+      }
+
+      // find the id of the parent node, i.e. the cell compartment
+      const parent = (!isTransport || compartmentA.outside === compartmentB) ? compartmentA : compartmentB
+      data.parent = compartmentMap.get(parent.id)
+
+      const scratch = { isTransport, compartmentA, compartmentB }
+      nodes.push({ data, classes, scratch })
+    }
+
+    // for (let data of values(sbmlLayout.textGlyphs)) {
+    // }
+
+    return { nodes, edges }
+  }
 }

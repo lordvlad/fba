@@ -26,3 +26,5 @@ module.exports = function (self) {
 
   waitForMessage()
 }
+
+module.exports.events = ['parse']

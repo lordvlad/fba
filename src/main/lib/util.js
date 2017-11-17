@@ -14,6 +14,7 @@ const get = (keys) => (o) => keys.split('.').reduce((o, k) => o && maybeEval(o[k
 const byProp = (...keys) => (val) => (x) => keys.reduce((o, k) => o && o[k], x) === val
 const isPromise = (obj) => typeof obj !== 'undefined' && typeof obj.then === 'function'
 const words = (s) => ({ [Symbol.iterator] () { return splitGen(s, ' ') } })
+const pick = (o, ...ks) => ks.reduce((r, k) => { r[k] = o[k]; return r }, {})
 
 /**
  * @param {IterableIterator<X>} it
@@ -126,5 +127,6 @@ module.exports = {
   words,
   filter,
   map,
-  isPromise
+  isPromise,
+  pick
 }

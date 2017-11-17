@@ -1,7 +1,6 @@
 /* global fetch, prompt */
 const frs = require('filereader-stream')
 const through = require('through2')
-const { Model } = require('jssbml')
 
 const filePicker = require('../lib/file-picker')
 const { biomodelsUrl } = require('../lib/biomodels')
@@ -10,33 +9,9 @@ module.exports = function () {
   return function (state, emitter) {
     const emit = emitter.emit.bind(emitter)
     const on = emitter.on.bind(emitter)
-    const render = () => emitter.emit('render')
-
-    function reader () {
-      const t = through(function (chunk) {
-        emitter.emit('sbml:parse', chunk)
-      })
-      return t
-    }
+    const reader = () => through((chunk) => emit('sbml:parse', chunk))
 
     on('sbml_response:parse:done', (m) => emit('model:set', m))
-
-    on('model:set', (model) => {
-      emit('progress:done')
-      emit('log:info', `loaded model '${model.id}'`)
-      state.content.model = model
-      render()
-    })
-
-    on('model:close', () => {
-      state.content.model = null
-      render()
-    })
-
-    on('model:new', () => {
-      emit('model:set', new Model())
-      render()
-    })
 
     on('file:select:file', () => {
       filePicker({accept: '.xml'}, (files) => files.length && emit('file:open:file', files[0]))

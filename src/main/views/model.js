@@ -1,11 +1,7 @@
 const html = require('choo/html')
 const css = require('sheetify')
-const xtend = require('xtend')
 
-const ModelComponent = require('../components/model')
 const { killEvent } = require('../lib/util')
-
-const modelComponent = new ModelComponent()
 
 const constStyle = css`
   :host {
@@ -39,14 +35,12 @@ const li = ({title = 'blub', icon = 'angle-right', onclick = notImpl, styles = '
     </a>
   </li>
 `
-const lii = (icon, title, onclick, disabled = false, flip = false) => li({icon, title, onclick, flip, disabled})
+const lii = (onclick, icon, title, disabled = false, flip = false) => li({icon, title, onclick, flip, disabled})
 
-
-module.exports = function contentView ({content}, emit) {
-  const example = () => emit('file:open:biomodelsid', content.exampleId)
-  const example1 = () => emit('file:open:url', content.exampleUrl)
-
+module.exports = function contentView ({components, content}, emit) {
   if (!content.model) {
+    const example = () => emit('file:open:biomodelsid', content.exampleId)
+    const example1 = () => emit('file:open:url', content.exampleUrl)
     return callout(html`
       <div class="pa0 ma0">
         Start creating a metabolic network by
@@ -60,18 +54,25 @@ module.exports = function contentView ({content}, emit) {
     `)
   }
 
-  const { undoable, redoable, lock, pan } = modelComponent.state
-  modelComponent.bubbleUp = () => emit('render')
+  const {lock, pan, undos, redos} = content
+  const {model} = components
+  const undoable = undos.length !== 0
+  const redoable = redos.length !== 0
+
+  const toggleLock = () => emit('model:lock:toggle', !lock)
+  const togglePan = () => emit('model:pan:toggle', !pan)
+  const undo = () => emit('model:history:undo')
+  const redo = () => emit('model:history:redo')
 
   return html`
     <div class="w-100 h-100">
       <ul class="w-100 list dib pa0 ma0">
-        ${lii('undo', 'undo', () => modelComponent.undo(), !undoable)}
-        ${lii('undo', 'redo', () => modelComponent.redo(), !redoable, true)}
-        ${lii(lock ? 'lock' : 'unlock', `${lock ? 'unlock' : 'lock'} positions`, () => modelComponent.toggleLock())}
-        ${lii(pan ? 'hand-paper-o' : 'arrows', `${pan ? 'disable' : 'enable'} pan and zoom controls`, () => modelComponent.togglePan())}
+        ${lii(undo, 'undo', 'undo', !undoable)}
+        ${lii(redo, 'undo', 'redo', !redoable, true)}
+        ${lii(toggleLock, lock ? 'lock' : 'unlock', `${lock ? 'unlock' : 'lock'} positions`)}
+        ${lii(togglePan, pan ? 'hand-paper-o' : 'arrows', `${pan ? 'disable' : 'enable'} pan and zoom controls`)}
       </ul>
-      ${modelComponent.render(content)}
+      ${model.render(content)}
     </div>
   `
 }

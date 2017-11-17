@@ -10,6 +10,9 @@ Small experiment to calculate flux balance analysis in the browser.
 - [x] move the parser to the client side code, too
 - [x] do sbml parsing in a webworker
 - [x] switch to cytoscape for visualization
+- [x] enable undo
+- [ ] enable persistent undo
+- [ ] show recent models
 - [ ] allow the user to define constraints
 - [ ] run fba
 - [ ] present the results
