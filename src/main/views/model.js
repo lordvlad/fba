@@ -39,15 +39,15 @@ const lii = (onclick, icon, title, disabled = false, flip = false) => li({icon, 
 
 module.exports = function contentView ({components, content}, emit) {
   if (!content.model) {
-    const example = () => emit('file:open:biomodelsid', content.exampleId)
+    // const example = () => emit('file:open:biomodelsid', content.exampleId)
     const example1 = () => emit('file:open:url', content.exampleUrl)
+    // <li>Open an <a href=# title=${content.exampleID} onclick=${example}>example model from biomodels</a></li>
     return callout(html`
       <div class="pa0 ma0">
         Start creating a metabolic network by
         <ul>
           <li>Drag and drop an SBML file anywhere on the page</li>
           <li>Go through the file menu to open an SBML file</li>
-          <li>Open an <a href=# title=${content.exampleID} onclick=${example}>example model from biomodels</a></li>
           <li>Open an <a href=# title=${content.exampleUrl} onclick=${example1}>example model from a URL</a></li>
         </ul>
       </div>
