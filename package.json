@@ -8,7 +8,7 @@
     "test": "nyc ava",
     "report": "nyc report --reporter=text-lcov | coveralls",
     "start": "bankai start src/main/index",
-    "build": "rimraf build && bankai build src/main/index && mvy src/main/index build",
+    "build": "rimraf dist && bankai build src/main/index && mvy src/main/index/dist dist",
     "deploy": "surge -p dist -d flux.surge.sh"
   },
   "sheetify": {
