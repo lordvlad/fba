@@ -30,5 +30,4 @@ const li = ({title = 'blub', icon = 'angle-right', onclick = notImpl, selected =
   </li>
 `
 
-
 module.exports = li

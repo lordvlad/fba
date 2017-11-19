@@ -12,4 +12,3 @@ module.exports = function () {
     emitter.emit('log:info', 'application started')
   }
 }
-
