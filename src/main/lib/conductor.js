@@ -2,9 +2,7 @@ const webworkify = require('webworkify')
 
 function conductor (workerModule, domain) {
   const worker = webworkify(workerModule)
-  const post = (...args) => {
-    worker.postMessage(args)
-  }
+  const post = (...args) => worker.postMessage(args)
 
   return function (state, emitter) {
     worker.addEventListener('message', function ({ data: [key, data] }) {
