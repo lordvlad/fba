@@ -1,30 +1,23 @@
-const {createReader, createBuilder} = require('jssbml')
+const { createReader, createBuilder } = require('jssbml')
 
 module.exports = function (self) {
-  let reader
-  function waitForMessage () {
-    self.removeEventListener('message', onSbmlFileTail)
-    self.addEventListener('message', onMessage)
-  }
-  function waitForSbmlFileTail () {
-    self.removeEventListener('message', onMessage)
-    self.addEventListener('message', onSbmlFileTail)
-  }
-  function onMessage ({data: [key, data]}) {
-    if (key !== 'parse') return
+  let reader = null
+  let tail = false
+  self.addEventListener('message', function ({data}) {
+    if (tail && reader) reader.write(data)
+    else if (!tail && !reader) onMessage(data[0], data[1])
+  })
+  function onMessage (event, data) {
+    if (event !== 'parse') return
     reader = createReader()
     reader.pipe(createBuilder()).on('data', function (model) {
-      waitForMessage()
+      tail = false
+      reader = null
       self.postMessage(['parse:done', model])
     })
-    reader.write(data)
-    waitForSbmlFileTail()
-  }
-  function onSbmlFileTail ({data}) {
+    tail = true
     reader.write(data)
   }
-
-  waitForMessage()
 }
 
 module.exports.events = ['parse']
