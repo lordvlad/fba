@@ -24,7 +24,7 @@
     "assign-deep": "^0.4.6",
     "ava": "^0.23.0",
     "babel-eslint": "^8.0.2",
-    "bankai": "^8.1.1",
+    "bankai": "^9.0.0-rc12",
     "browserify": "^14.5.0",
     "cheerio": "^1.0.0-rc.1",
     "choo": "^6.5.1",
