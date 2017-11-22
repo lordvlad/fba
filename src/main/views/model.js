@@ -66,7 +66,7 @@ module.exports = function contentView ({components, content}, emit) {
 
   return html`
     <div class="w-100 h-100">
-      <ul class="w-100 list dib pa0 ma0">
+      <ul class="absolute z-1 w-100 list dib pa0 ma0">
         ${lii(undo, 'undo', 'undo', !undoable)}
         ${lii(redo, 'undo', 'redo', !redoable, true)}
         ${lii(toggleLock, lock ? 'lock' : 'unlock', `${lock ? 'unlock' : 'lock'} positions`)}
