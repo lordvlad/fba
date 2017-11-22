@@ -7,7 +7,8 @@ const networkView = require('./network')
 const calcView = require('./calc')
 const optionsView = require('./options')
 
-const width = css`:host > ul { width: 16em }`
+const subMenuWidth = css`:host > ul { width: 16em }`
+const menuWidth = css`:host { width: 3rem }`
 
 module.exports = function menuView (state, emit) {
   const select = (what) => (e) => emit('menu:active', what)
@@ -32,8 +33,8 @@ module.exports = function menuView (state, emit) {
   })
 
   return html`
-    <div class="pa0 ma0 h-100 flex flex-row">
-      <div class="pa0 ma0 h-100 bg-black-80">
+    <div class="${menuWidth} pa0 ma0 h-100 flex flex-row z-1">
+      <div class="pa0 ma0 h-100 bg-dark-gray">
         <ul class="list pa0 ma0 h-100 flex flex-column">
           ${lii('file', 'file-o', select('file'))}
           ${lii('network', 'code-fork', select('network'), !content.model)}
@@ -42,7 +43,7 @@ module.exports = function menuView (state, emit) {
           ${lii('options', 'wrench', select('options'))}
         </ul>
       </div>
-      <div class="${width} pa0 ma0 h-100 bg-black-60">
+      <div class="${subMenuWidth} pa0 ma0 h-100 bg-gray">
         ${tab}
       </div>
     </div>
