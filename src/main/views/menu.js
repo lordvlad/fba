@@ -33,7 +33,7 @@ module.exports = function menuView (state, emit) {
   })
 
   return html`
-    <div class="${menuWidth} pa0 ma0 h-100 flex flex-row z-1">
+    <div class="${menuWidth} pa0 ma0 h-100 flex flex-row z-2">
       <div class="pa0 ma0 h-100 bg-dark-gray">
         <ul class="list pa0 ma0 h-100 flex flex-column">
           ${lii('file', 'file-o', select('file'))}
