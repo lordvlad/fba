@@ -11,7 +11,6 @@ css`
  `
 
 css('tachyons')
-css('tachyons-debug-grid')
 css('font-awesome')
 css('nprogress/nprogress.css')
 css('../styles/fontawesome-embedded-fonts.css')
