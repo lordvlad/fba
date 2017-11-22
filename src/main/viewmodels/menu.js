@@ -21,6 +21,7 @@ module.exports = function () {
     const render = () => emitter.emit('render')
 
     on('menu:active', (active) => {
+      if ((active === 'network' || active === 'calculate') && !state.content.model) return
       state.menu.active = active === state.menu.active ? null : active
       emit('log:debug', `menu:active ${state.menu.active}`)
       render()
