@@ -8,7 +8,6 @@ const calcView = require('./calc')
 const optionsView = require('./options')
 
 const subMenuWidth = css`:host > ul { width: 16em }`
-const menuWidth = css`:host { width: 3rem }`
 
 module.exports = function menuView (state, emit) {
   const select = (what) => (e) => emit('menu:active', what)
@@ -33,7 +32,7 @@ module.exports = function menuView (state, emit) {
   })
 
   return html`
-    <div class="${menuWidth} pa0 ma0 h-100 flex flex-row z-2">
+    <div class="pa0 ma0 h-100 flex flex-row z-2">
       <div class="pa0 ma0 h-100 bg-dark-gray">
         <ul class="list pa0 ma0 h-100 flex flex-column">
           ${lii('file', 'file-o', select('file'))}
