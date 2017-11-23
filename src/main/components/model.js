@@ -12,15 +12,23 @@ const values = Object.values
 const select = (s) => document.querySelector(s)
 
 // const purple = Color('#b470d6')
-const eggshell = Color('#f4f2f4')
-const blue = Color('#4bc5cf')
+const compartment = Color('#f4f2f4')
+const species = Color('#4bc5cf')
 // const orange = Color('#f3b70a')
-const brick = Color('#f56169')
+const reaction = Color('#f56169')
 const locked = true
 
 // register panzoom extension to use maps-like
 // zoom and navigation controls
 panzoom(cytoscape, require('jquery'))
+
+// register the cytoscape cola extension
+// this allows us to use cola.js for force layouts
+cycola(cytoscape)
+
+// register undoredo with cytoscape
+undoredo(cytoscape)
+
 css('cytoscape-panzoom')
 css`
   .cy-panzoom {
@@ -31,13 +39,6 @@ css`
   }
   .cy-panzoom:hover { opacity: 1; }
 `
-
-// register the cytoscape cola extension
-// this allows us to use cola.js for force layouts
-cycola(cytoscape)
-
-// register undoredo with cytoscape
-undoredo(cytoscape)
 
 const style = [
   {
@@ -52,29 +53,47 @@ const style = [
     style: {
       shape: 'ellipse',
       content: 'data(id)',
-      'background-color': blue.string(),
-      'border-color': blue.darken(0.5).string(),
+      'background-color': species.string(),
+      'border-color': species.darken(0.5).string(),
       'border-width': 2
+    }
+  },
+  {
+    selector: '.species:selected',
+    style: {
+      'border-color': new Color('#ff0000').string()
     }
   },
   {
     selector: '.reaction',
     style: {
       shape: 'rectangle',
-      'background-color': brick.string(),
-      'border-color': brick.darken(0.5).string(),
+      'background-color': reaction.string(),
+      'border-color': reaction.darken(0.5).string(),
       'border-width': 2,
       content: 'data(id)'
+    }
+  },
+  {
+    selector: '.reaction:selected',
+    style: {
+      'border-color': new Color('#ff0000').string()
     }
   },
   {
     selector: '.compartment',
     style: {
       shape: 'roundrectangle',
-      'background-color': eggshell.string(),
-      'border-color': eggshell.darken(0.5).string(),
+      'background-color': compartment.string(),
+      'border-color': compartment.darken(0.5).string(),
       'border-width': 2,
       content: 'data(id)'
+    }
+  },
+  {
+    selector: '.compartment:selected',
+    style: {
+      'border-color': new Color('#ff0000').string()
     }
   }
 ]
@@ -116,8 +135,8 @@ module.exports = class ModelComponent extends Nanocomponent {
     return redraw
   }
 
+  // auto layout nodes which don't have a position set
   layout () {
-    // auto layout nodes which don't have a position set
     const c = this.c
     c.elements('node[!position]').layout({
       name: 'cola',
