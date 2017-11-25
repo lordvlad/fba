@@ -109,6 +109,8 @@ module.exports = class ModelComponent extends Nanocomponent {
     emitter.on('model:lock:toggle', this.toggleLock)
     emitter.on('model:history:undo', this.undo)
     emitter.on('model:history:redo', this.redo)
+
+    this.select = (n) => emitter.emit('model:node:select', n)
   }
 
   // draw graph after node is mounted or full update is needed
@@ -184,6 +186,7 @@ module.exports = class ModelComponent extends Nanocomponent {
     this.c.on('afterDo', this.bubbleUp)
     this.c.on('afterUndo', this.bubbleUp)
     this.c.on('afterRedo', this.bubbleUp)
+    this.c.on('select', (e) => this.select(e.target.data()))
 
     this.togglePan(this.state.pan)
     this.toggleLock(this.state.lock)

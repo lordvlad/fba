@@ -2,6 +2,7 @@ const morph = require('xtend/mutable')
 
 const initialState = {
   active: null,
+  width: 224,
   file: {
     search: {
       searchId: 'search',

@@ -7,7 +7,7 @@ module.exports = function fileView (state, send) {
   const hasModel = !!state.content.model
 
   return html`
-    <ul class="list pa0 ma0 measure-narrow">
+    <ul class="list pa0 ma0">
       ${lii('new model', 'file-o', () => send('model:new'))}
       ${lii('open sbml file\u2026', 'folder-open-o', () => send('file:select:file'))}
       ${lii('open sbml url\u2026', 'external-link', () => send('file:select:url'))}

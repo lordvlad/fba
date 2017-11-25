@@ -29,5 +29,9 @@ module.exports = function () {
     on('model:lock:toggle', renderAfter((on) => { content.lock = on }))
     on('model:close', renderAfter(() => { content.model = null }))
     on('model:new', renderAfter(() => emit('model:set', new Model())))
+    on('model:node:select', renderAfter((n) => {
+      state.menu.active = 'detail'
+      state.detail = n
+    }))
   }
 }
