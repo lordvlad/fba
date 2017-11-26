@@ -10,7 +10,7 @@ module.exports = function networkView (state, send) {
         title: detail.id,
         icon: 'info',
         text: detail.id,
-        styles: 'b'
+        styles: 'underline'
       })}
     </ul>
   `
