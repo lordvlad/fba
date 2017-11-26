@@ -1,4 +1,4 @@
-const devtools = require('choo-devtools')
+// const devtools = require('choo-devtools')
 const choo = require('choo')
 
 const components = require('./viewmodels/components')
@@ -10,6 +10,7 @@ const menu = require('./viewmodels/menu')
 
 const nprogress = require('./lib/nprogress')
 const conductor = require('./lib/conductor')
+const persist = require('./lib/persist')
 const logger = require('./lib/logger')
 const focus = require('./lib/focus')
 
@@ -25,10 +26,13 @@ app.use(conductor(require('./worker/sbml'), 'sbml'))
 app.use(logger('fba'))
 app.use(components())
 app.use(nprogress())
-app.use(devtools())
+// app.use(devtools())
 app.use(content())
 app.use(hotkeys())
 app.use(model())
 app.use(focus())
 app.use(file())
 app.use(menu())
+
+// order matters, persist plugin must come last
+app.use(persist())

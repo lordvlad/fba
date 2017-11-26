@@ -7,6 +7,7 @@ const morph = require('xtend/mutable')
 const html = require('choo/html')
 const css = require('sheetify')
 const Color = require('color')
+const jquery = require('jquery')
 
 const values = Object.values
 const select = (s) => document.querySelector(s)
@@ -20,7 +21,7 @@ const locked = true
 
 // register panzoom extension to use maps-like
 // zoom and navigation controls
-panzoom(cytoscape, require('jquery'))
+panzoom(cytoscape, jquery)
 
 // register the cytoscape cola extension
 // this allows us to use cola.js for force layouts
