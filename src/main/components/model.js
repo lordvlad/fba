@@ -187,6 +187,9 @@ module.exports = class ModelComponent extends Nanocomponent {
     this.c.on('afterUndo', this.bubbleUp)
     this.c.on('afterRedo', this.bubbleUp)
     this.c.on('select', (e) => this.select(e.target.data()))
+    this.c.on('unselect', (e) => setTimeout(() => {
+      if (e.cy.$(':selected').length === 0) this.select(null)
+    }, 10))
 
     this.togglePan(this.state.pan)
     this.toggleLock(this.state.lock)
