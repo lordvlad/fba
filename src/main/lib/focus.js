@@ -1,5 +1,5 @@
 module.exports = function () {
-  return function focus (state, emitter) {
+  return function (state, emitter) {
     const empty = {focus: () => {}}
     const blur = () => document.activeElement.blur()
     const select = (id) => document.querySelector(id) || empty
