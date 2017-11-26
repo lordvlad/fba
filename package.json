@@ -7,7 +7,7 @@
   "scripts": {
     "test": "nyc ava",
     "report": "nyc report --reporter=text-lcov | coveralls",
-    "start": "bankai start src/main/index",
+    "start": "bankai start --debug src/main/index",
     "build": "bankai build src/main/index dist",
     "deploy": "surge -p dist -d flux.surge.sh"
   },
