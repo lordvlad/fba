@@ -71,7 +71,8 @@ module.exports = function menuView (state, emit) {
         <div style="width: ${menu.width}px" class="${submenu} v-top dib pa0 ma0 h-100 bg-gray">
           ${tab}
         </div>
-        <div class="v-top h-100 dib pa0 ma0 hover-bg-dark-gray ${drag} ${menu.dragging ? 'bg-dark-gray' : ''}"
+        <div title="drag to resize menu"
+          class="v-top h-100 dib pa0 ma0 hover-bg-dark-gray ${drag} ${menu.dragging ? 'bg-dark-gray' : ''}"
           ondragstart=${ondragstart} ondragend=${ondragend} ondrag=${ondrag} draggable=true></div>
         <div class="guard v-top h-100 dib pa0 ma0 ${guard}"></div>
       </div>`}
