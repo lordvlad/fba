@@ -10,7 +10,6 @@ const constStyle = css`
   }
 `
 const disabledLink = css` :host { cursor: default; } `
-const toolbar = css`:host { left: 3rem }`
 
 const callout = (inner) => html`
   <div class="measure pa4 mt4 bg-lightest-blue center v-mid">${inner}</div>
@@ -63,7 +62,7 @@ module.exports = function contentView ({components, content}, emit) {
 
   return html`
     <div class="w-100 h-100">
-      <ul class="${toolbar} absolute z-1 w-100 list dib pa0 ma0">
+      <ul class="tr pr3 absolute z-1 w-100 list dib pa0 ma0">
         ${lii(undo, 'undo', 'undo', !undoable)}
         ${lii(redo, 'undo', 'redo', !redoable, true)}
         ${lii(toggleLock, lock ? 'lock' : 'unlock', `${lock ? 'unlock' : 'lock'} positions`)}
