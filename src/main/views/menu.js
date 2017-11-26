@@ -6,13 +6,16 @@ const fileView = require('./file')
 const networkView = require('./network')
 const calcView = require('./calc')
 const optionsView = require('./options')
-const detailsView = require('./details')
 
 const query = (s) => document.querySelector(s)
 
-const guard = css`:host { width: 5px }`
+const guard = css`:host { width: 50px; }`
 const drag = css`:host { width: 5px; cursor: col-resize; }`
-const submenu = css`:host > ul { width: 100% }`
+const submenu = css`
+  :host .guard { display: none; }
+  :host:hover .guard { display: inline-block; }
+  :host > div > ul { width: 100%; }
+`
 
 module.exports = function menuView (state, emit) {
   const select = (what) => (e) => emit('menu:active', what)
@@ -30,7 +33,6 @@ module.exports = function menuView (state, emit) {
     network: () => networkView(state, emit),
     calculate: () => calcView(state, emit),
     options: () => optionsView(state, emit),
-    detail: () => detailsView(state, emit),
     [null]: () => ''
   })[menu.active]()
 
@@ -65,13 +67,13 @@ module.exports = function menuView (state, emit) {
           ${lii('options', 'wrench', select('options'))}
         </ul>
       </div>
-      ${!tab ? '' : html`<div>
+      ${!tab ? '' : html`<div class=${submenu}>
         <div style="width: ${menu.width}px" class="${submenu} v-top dib pa0 ma0 h-100 bg-gray">
           ${tab}
         </div>
         <div class="v-top h-100 dib pa0 ma0 hover-bg-dark-gray ${drag} ${menu.dragging ? 'bg-dark-gray' : ''}"
           ondragstart=${ondragstart} ondragend=${ondragend} ondrag=${ondrag} draggable=true></div>
-        <div class="v-top h-100 dib pa0 ma0 ${guard}"></div>
+        <div class="guard v-top h-100 dib pa0 ma0 ${guard}"></div>
       </div>`}
     </div>
   `

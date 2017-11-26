@@ -30,8 +30,8 @@ module.exports = function () {
     on('model:close', renderAfter(() => { content.model = null }))
     on('model:new', renderAfter(() => emit('model:set', new Model())))
     on('model:node:select', renderAfter((n) => {
-      state.menu.active = 'detail'
-      state.detail = n
+      state.menu.active = 'network'
+      state.menu.network.detail = n
     }))
   }
 }
