@@ -1,5 +1,7 @@
-const { Model } = require('jssbml')
+const jssbml = require('jssbml')
 const morph = require('xtend/mutable')
+
+const Model = jssbml.Document.Model
 
 const initialState = {
   undos: [],

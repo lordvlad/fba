@@ -198,71 +198,76 @@ module.exports = class ModelComponent extends Nanocomponent {
   }
 
   shapeData () {
-    const model = this.state.model
+    const model = this.state.model.model
     const nodes = []
     const edges = []
     const compartmentMap = new Map()
-    const sbmlLayout = model.annotation.layouts[0]
-    for (let data of values(sbmlLayout.compartmentGlyphs)) {
-      compartmentMap.set(data.compartment.id, data.id)
-      if (data.compartment.outside) {
-        data.parent = compartmentMap.get(data.compartment.outside.id)
-      }
-      const classes = 'compartment'
-      const position = {
-        x: data.boundingBox.x + data.boundingBox.width / 2,
-        y: data.boundingBox.y + data.boundingBox.height / 2
-      }
-      nodes.push({ data, position, classes, locked })
-    }
 
-    for (let data of values(sbmlLayout.speciesGlyphs)) {
-      if (data.species.compartment) {
-        data.parent = compartmentMap.get(data.species.compartment.id)
+    const annotation = model.annotation
+    const layouts = annotation.listOfLayouts
+    if (layouts && layouts.length) {
+      const sbmlLayout = model.annotation.listOfLayouts[0]
+      for (let data of values(sbmlLayout.listOfCompartmentGlyphs)) {
+        compartmentMap.set(data.compartment.id, data.id)
+        if (data.compartment.outside) {
+          data.parent = compartmentMap.get(data.compartment.outside.id)
+        }
+        const classes = 'compartment'
+        const position = {
+          x: data.boundingBox.x + data.boundingBox.width / 2,
+          y: data.boundingBox.y + data.boundingBox.height / 2
+        }
+        nodes.push({ data, position, classes, locked })
       }
-      const classes = 'species'
-      const position = {
-        x: data.boundingBox.x + data.boundingBox.width / 2,
-        y: data.boundingBox.y + data.boundingBox.height / 2
+
+      for (let data of values(sbmlLayout.listOfSpeciesGlyphs)) {
+        if (data.species.compartment) {
+          data.parent = compartmentMap.get(data.species.compartment.id)
+        }
+        const classes = 'species'
+        const position = {
+          x: data.boundingBox.x + data.boundingBox.width / 2,
+          y: data.boundingBox.y + data.boundingBox.height / 2
+        }
+        nodes.push({ data, position, classes, locked })
       }
-      nodes.push({ data, position, classes, locked })
-    }
 
-    for (let data of values(sbmlLayout.reactionGlyphs)) {
-      const classes = 'reaction'
-      let compartmentA = null
-      let compartmentB = null
-      let isTransport = false
+      for (let data of values(sbmlLayout.listOfReactionGlyphs)) {
+        const classes = 'reaction'
+        let compartmentA = null
+        let compartmentB = null
+        let isTransport = false
 
-      for (let s of data.speciesReferenceGlyphs) {
-        // find out if the reaction is a transport
-        if (!isTransport) {
-          // check all encountered compartments and see if they are all the same
-          if (!compartmentA) {
-            compartmentA = s.speciesGlyph.species.compartment
-          } else if (compartmentA !== s.speciesGlyph.species.compartment) {
-            compartmentB = s.speciesGlyph.species.compartment
-            isTransport = true
+        for (let s of data.speciesReferenceGlyphs) {
+          // find out if the reaction is a transport
+          if (!isTransport) {
+            // check all encountered compartments and see if they are all the same
+            if (!compartmentA) {
+              compartmentA = s.speciesGlyph.species.compartment
+            } else if (compartmentA !== s.speciesGlyph.species.compartment) {
+              compartmentB = s.speciesGlyph.species.compartment
+              isTransport = true
+            }
           }
+
+          // determine role and set source and target nodes accordingly
+          const x = s.role === 'substrate'
+          s.source = x ? s.speciesGlyph.id : data.id
+          s.target = !x ? s.speciesGlyph.id : data.id
+          edges.push({ data: s })
         }
 
-        // determine role and set source and target nodes accordingly
-        const x = s.role === 'substrate'
-        s.source = x ? s.speciesGlyph.id : data.id
-        s.target = !x ? s.speciesGlyph.id : data.id
-        edges.push({ data: s })
+        // find the id of the parent node, i.e. the cell compartment
+        const parent = (!isTransport || compartmentA.outside === compartmentB) ? compartmentA : compartmentB
+        data.parent = compartmentMap.get(parent.id)
+
+        const scratch = { isTransport, compartmentA, compartmentB }
+        nodes.push({ data, classes, scratch })
       }
 
-      // find the id of the parent node, i.e. the cell compartment
-      const parent = (!isTransport || compartmentA.outside === compartmentB) ? compartmentA : compartmentB
-      data.parent = compartmentMap.get(parent.id)
-
-      const scratch = { isTransport, compartmentA, compartmentB }
-      nodes.push({ data, classes, scratch })
+      // for (let data of values(sbmlLayout.textGlyphs)) {
+      // }
     }
-
-    // for (let data of values(sbmlLayout.textGlyphs)) {
-    // }
 
     return { nodes, edges }
   }
