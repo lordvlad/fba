@@ -180,6 +180,7 @@ module.exports = class ModelComponent extends Nanocomponent {
 
     const elements = this.shapeData()
     this.c = cytoscape({ container: this.element, elements, style, layout })
+    window.cy = this.c
 
     this.history = this.c.undoRedo()
     this.history.reset(this.state.undos, this.state.redos)

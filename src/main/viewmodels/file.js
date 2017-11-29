@@ -1,19 +1,10 @@
 /* global fetch, prompt */
 const frs = require('filereader-stream')
 const through = require('through2')
-const { revive } = require('jssbml')
 
 const filePicker = require('../lib/file-picker')
 const { biomodelsUrl } = require('../lib/biomodels')
-
-require('../lib/persist').add({
-  get: (o) => {
-    if (o.content && o.content.model) {
-      o.content.model = revive(o.content.model)
-    }
-    return o
-  }
-})
+const { revive } = require('../lib/jssbml')
 
 module.exports = function () {
   return function (state, emitter) {

@@ -1,11 +1,8 @@
-const jssbml = require('jssbml/extensions/fbc')(require('jssbml'))
 const morph = require('xtend/mutable')
 
-const {Document} = jssbml
+const jssbml = require('../lib/jssbml')
 
-require('../lib/persist').add({
-  set: (state) => Object.assign({}, state, {undos: [], redos: []})
-})
+const {Document} = jssbml
 
 const initialState = {
   undos: [],

@@ -38,7 +38,6 @@
     "cytoscape-panzoom": "^2.5.2",
     "cytoscape-undo-redo": "git://github.com/lordvlad/cytoscape.js-undo-redo.git#563d10e544e9e2d37286dc0332a8e0933aa76584",
     "deep-assign": "^2.0.0",
-    "deep-extend": "^0.5.0",
     "domready": "^1.0.8",
     "drag-and-drop-files": "^0.0.1",
     "duplexer": "^0.1.1",
