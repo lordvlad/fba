@@ -12,7 +12,7 @@ module.exports = function () {
     const on = emitter.on.bind(emitter)
     const reader = () => through((chunk) => emit('sbml:parse', chunk))
 
-    on('sbml_response:parse:done', (m) => emit('model:set', revive(m))
+    on('sbml_response:parse:done', (m) => emit('model:set', revive(m)))
 
     on('file:select:file', () => {
       filePicker({accept: '.xml'}, (files) => files.length && emit('file:open:file', files[0]))
