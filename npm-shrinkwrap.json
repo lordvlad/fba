@@ -6335,9 +6335,9 @@
       }
     },
     "jssbml": {
-      "version": "0.0.3",
-      "resolved": "https://registry.npmjs.org/jssbml/-/jssbml-0.0.3.tgz",
-      "integrity": "sha512-roORXvwGE8YVKW2Q9m7LG1LaCJG7qRwQVgOWQcksKWiHsQB5OJiUvZc8cV8OJTgEQj/h5E18Z6j5L3X2KfR3Jg==",
+      "version": "0.0.4",
+      "resolved": "https://registry.npmjs.org/jssbml/-/jssbml-0.0.4.tgz",
+      "integrity": "sha512-yrgajzStXZuqEkDZ3j+tvT9NbWxLRaQ1ViLLZE0LC0QdkbZusnTD1ag/FJ5IDTQ/WjjAwxTq3UDS1mkhjwQOCQ==",
       "dev": true,
       "requires": {
         "array-last": "1.2.0",
