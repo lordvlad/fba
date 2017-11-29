@@ -9,7 +9,6 @@ const css = require('sheetify')
 const Color = require('color')
 const jquery = require('jquery')
 
-const values = Object.values
 const select = (s) => document.querySelector(s)
 
 // const purple = Color('#b470d6')
@@ -207,7 +206,7 @@ module.exports = class ModelComponent extends Nanocomponent {
     const layouts = annotation.listOfLayouts
     if (layouts && layouts.length) {
       const sbmlLayout = model.annotation.listOfLayouts[0]
-      for (let data of values(sbmlLayout.listOfCompartmentGlyphs)) {
+      for (let data of sbmlLayout.listOfCompartmentGlyphs) {
         compartmentMap.set(data.compartment.id, data.id)
         if (data.compartment.outside) {
           data.parent = compartmentMap.get(data.compartment.outside.id)
@@ -220,7 +219,7 @@ module.exports = class ModelComponent extends Nanocomponent {
         nodes.push({ data, position, classes, locked })
       }
 
-      for (let data of values(sbmlLayout.listOfSpeciesGlyphs)) {
+      for (let data of sbmlLayout.listOfSpeciesGlyphs) {
         if (data.species.compartment) {
           data.parent = compartmentMap.get(data.species.compartment.id)
         }
@@ -232,13 +231,13 @@ module.exports = class ModelComponent extends Nanocomponent {
         nodes.push({ data, position, classes, locked })
       }
 
-      for (let data of values(sbmlLayout.listOfReactionGlyphs)) {
+      for (let data of sbmlLayout.listOfReactionGlyphs) {
         const classes = 'reaction'
         let compartmentA = null
         let compartmentB = null
         let isTransport = false
 
-        for (let s of data.speciesReferenceGlyphs) {
+        for (let s of data.listOfSpeciesReferenceGlyphs) {
           // find out if the reaction is a transport
           if (!isTransport) {
             // check all encountered compartments and see if they are all the same
