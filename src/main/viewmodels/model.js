@@ -1,7 +1,11 @@
-const jssbml = require('jssbml')
+const jssbml = require('jssbml/extensions/fbc')(require('jssbml'))
 const morph = require('xtend/mutable')
 
-const Model = jssbml.Document.Model
+const {Document} = jssbml
+
+require('../lib/persist').add({
+  set: (state) => Object.assign({}, state, {undos: [], redos: []})
+})
 
 const initialState = {
   undos: [],
@@ -29,7 +33,7 @@ module.exports = function () {
     on('model:pan:toggle', renderAfter((on) => { state.content.pan = on }))
     on('model:lock:toggle', renderAfter((on) => { state.content.lock = on }))
     on('model:close', renderAfter(() => { state.content.model = null }))
-    on('model:new', renderAfter(() => emit('model:set', new Model())))
+    on('model:new', renderAfter(() => emit('model:set', new Document())))
     on('model:node:select', renderAfter((n) => {
       state.menu.active = 'network'
       state.menu.network.detail = n

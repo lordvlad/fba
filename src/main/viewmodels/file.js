@@ -6,6 +6,15 @@ const { revive } = require('jssbml')
 const filePicker = require('../lib/file-picker')
 const { biomodelsUrl } = require('../lib/biomodels')
 
+require('../lib/persist').add({
+  get: (o) => {
+    if (o.content && o.content.model) {
+      o.content.model = revive(o.content.model)
+    }
+    return o
+  }
+})
+
 module.exports = function () {
   return function (state, emitter) {
     const emit = emitter.emit.bind(emitter)
