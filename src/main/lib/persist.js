@@ -3,7 +3,6 @@ const xtend = require('xtend')
 const morph = require('xtend/mutable')
 const debounce = require('lodash.debounce')
 const { revive } = require('./jssbml')
-const omit = require('lodash.omit')
 
 function replaceAction (action) {
   return {
@@ -11,22 +10,6 @@ function replaceAction (action) {
     args: xtend({}, action.args, {
       nodes: action.args.nodes.map((n) => n.data('id'))
     })
-  }
-}
-
-function reviveAction (action) {
-  const nodes = action.args.nodes
-  let _nodes
-  return {
-    name: action.name,
-    args: morph({
-      get nodes () {
-        if (!_nodes) {
-          _nodes = nodes.map((id) => window.cy.$('#' + id))
-        }
-        return _nodes
-      }
-    }, omit(action.args, 'node'))
   }
 }
 
@@ -38,7 +21,6 @@ const replacer = (k, v) => {
 
 const reviver = (k, v) => {
   if (k === 'model' && v.xmlns) return revive(v)
-  if (['undos', 'redos'].includes(k)) return v.map(reviveAction)
   return v
 }
 const setters = []

@@ -4,10 +4,11 @@ const panzoom = require('cytoscape-panzoom')
 const cycola = require('cytoscape-cola')
 const cytoscape = require('cytoscape')
 const morph = require('xtend/mutable')
+const omit = require('lodash.omit')
 const html = require('choo/html')
+const jquery = require('jquery')
 const css = require('sheetify')
 const Color = require('color')
-const jquery = require('jquery')
 
 const select = (s) => document.querySelector(s)
 
@@ -179,11 +180,28 @@ module.exports = class ModelComponent extends Nanocomponent {
     if (!this.state.model) return
 
     const elements = this.shapeData()
-    this.c = cytoscape({ container: this.element, elements, style, layout })
-    window.cy = this.c
+    const c = this.c = cytoscape({ container: this.element, elements, style, layout })
+    function reviveAction (action) {
+      const nodes = action.args.nodes
+      let _nodes
+      return {
+        name: action.name,
+        args: morph({
+          get nodes () {
+            if (!_nodes) {
+              _nodes = nodes.map((id) => c.$('#' + id))
+            }
+            return _nodes
+          }
+        }, omit(action.args, 'node'))
+      }
+    }
+
+    const undos = !this.state.undos ? [] : this.state.undos.map(reviveAction)
+    const redos = !this.state.redos ? [] : this.state.redos.map(reviveAction)
 
     this.history = this.c.undoRedo()
-    this.history.reset(this.state.undos, this.state.redos)
+    this.history.reset(undos, redos)
     this.c.on('afterDo', this.bubbleUp)
     this.c.on('afterUndo', this.bubbleUp)
     this.c.on('afterRedo', this.bubbleUp)
