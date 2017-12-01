@@ -181,27 +181,23 @@ module.exports = class ModelComponent extends Nanocomponent {
 
     const elements = this.shapeData()
     const c = this.c = cytoscape({ container: this.element, elements, style, layout })
-    function reviveAction (action) {
+    function reviveAction (action, i, array) {
+      if (typeof action.args.nodes[0] !== 'string') return false
       const nodes = action.args.nodes
-      let _nodes
-      return {
+      array[i] = {
         name: action.name,
         args: morph({
-          get nodes () {
-            if (!_nodes) {
-              _nodes = nodes.map((id) => c.$('#' + id))
-            }
-            return _nodes
-          }
-        }, omit(action.args, 'node'))
+          nodes: nodes.map((id) => c.$('#' + id))
+        }, omit(action.args, 'nodes'))
       }
+      return true
     }
 
-    const undos = !this.state.undos ? [] : this.state.undos.map(reviveAction)
-    const redos = !this.state.redos ? [] : this.state.redos.map(reviveAction)
+    this.state.undos.every(reviveAction)
+    this.state.redos.every(reviveAction)
 
     this.history = this.c.undoRedo()
-    this.history.reset(undos, redos)
+    this.history.reset(this.state.undos, this.state.redos)
     this.c.on('afterDo', this.bubbleUp)
     this.c.on('afterUndo', this.bubbleUp)
     this.c.on('afterRedo', this.bubbleUp)
