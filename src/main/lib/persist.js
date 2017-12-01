@@ -26,7 +26,7 @@ function reviveAction (action) {
         }
         return _nodes
       }
-    }, omit(action.args, 'nodes'))
+    }, omit(action.args, 'node'))
   }
 }
 
