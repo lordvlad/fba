@@ -2,9 +2,8 @@ language: node_js
 node_js: "9"
 cache:
   directories:
-    - "node_modules"
+    - node_modules
 install:
-  - rm -rf node_modules
   - npm install
 script:
   - npm run test
