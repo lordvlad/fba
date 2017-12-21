@@ -86,6 +86,7 @@
     "setprototypeof": "^1.1.0",
     "sheetify": "^6.2.0",
     "sheetify-cssnext": "^1.0.7",
+    "split-require": "^2.0.3",
     "standard": "^10.0.3",
     "surge": "^0.19.0",
     "tachyons": "^4.9.0",
