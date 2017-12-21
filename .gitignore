@@ -2,3 +2,4 @@ node_modules
 .nyc*
 *log
 dist/*
+*cache
