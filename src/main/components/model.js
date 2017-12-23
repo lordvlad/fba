@@ -33,8 +33,8 @@ undoredo(cytoscape)
 css('cytoscape-panzoom')
 css`
   .cy-panzoom {
-    right: 0;
-    margin-right: 50px;
+    top: 2.5rem;
+    right: 3.5rem;
     opacity: .4;
     transition: opacity .15s ease-in;
   }
