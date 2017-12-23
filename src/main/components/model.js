@@ -165,7 +165,6 @@ module.exports = class ModelComponent extends Nanocomponent {
     this.state.lock = on
     this.c.autolock(on)
     this.c.autoungrabify(on)
-    this.c.autounselectify(on)
   }
 
   undo () {
