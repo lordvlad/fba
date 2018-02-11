@@ -2,7 +2,7 @@
 const xtend = require('xtend')
 const morph = require('xtend/mutable')
 const debounce = require('lodash.debounce')
-const { revive } = require('./jssbml')
+const revive = require('./jssbml').createReviver()
 
 function replaceAction (action) {
   return {

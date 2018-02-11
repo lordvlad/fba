@@ -4,7 +4,7 @@ const through = require('through2')
 
 const filePicker = require('../lib/file-picker')
 const { biomodelsUrl } = require('../lib/biomodels')
-const { revive } = require('../lib/jssbml')
+const revive = require('../lib/jssbml').createReviver()
 
 module.exports = function () {
   return function (state, emitter) {

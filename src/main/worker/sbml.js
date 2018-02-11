@@ -1,4 +1,4 @@
-const { createReader, createBuilder } = require('jssbml')
+const { createReader } = require('../lib/jssbml')
 
 module.exports = function (self) {
   let reader = null
@@ -10,7 +10,7 @@ module.exports = function (self) {
   function onMessage (event, data) {
     if (event !== 'parse') return
     reader = createReader()
-    reader.pipe(createBuilder()).on('data', function (model) {
+    reader.on('data', function (model) {
       tail = false
       reader = null
       self.postMessage(['parse:done', model])
