@@ -5,6 +5,7 @@ const cycola = require('cytoscape-cola')
 const cytoscape = require('cytoscape')
 const morph = require('xtend/mutable')
 const omit = require('lodash.omit')
+const debounce = require('lodash.debounce')
 const html = require('choo/html')
 const jquery = require('jquery')
 const css = require('sheetify')
@@ -104,6 +105,7 @@ module.exports = class ModelComponent extends Nanocomponent {
   constructor (emitter) {
     super()
     this.state = {}
+    this.emitter = emitter
     this.bubbleUp = () => emitter.emit('render')
     this.guardMethods()
     emitter.on('model:pan:toggle', this.togglePan)
@@ -111,7 +113,7 @@ module.exports = class ModelComponent extends Nanocomponent {
     emitter.on('model:history:undo', this.undo)
     emitter.on('model:history:redo', this.redo)
 
-    this.select = (n) => emitter.emit('model:node:select', n)
+    this.select = debounce((n) => emitter.emit('model:node:select', n), 100)
   }
 
   // draw graph after node is mounted or full update is needed
@@ -197,12 +199,15 @@ module.exports = class ModelComponent extends Nanocomponent {
 
     this.history = this.c.undoRedo()
     this.history.reset(this.state.undos, this.state.redos)
-    this.c.on('afterDo', this.bubbleUp)
-    this.c.on('afterUndo', this.bubbleUp)
-    this.c.on('afterRedo', this.bubbleUp)
-    this.c.on('select', (e) => this.select(e.target.data()))
-    this.c.on('unselect', (e) => setTimeout(() => {
-      if (e.cy.$(':selected').length === 0) this.select(null)
+    c.on('afterDo', this.bubbleUp)
+    c.on('afterUndo', this.bubbleUp)
+    c.on('afterRedo', this.bubbleUp)
+    c.on('select', (e) => this.select(e.target.data()))
+    c.on('boxend', (e) => setTimeout(() => {
+      this.select(c.$(':selected').map(t => t.data()))
+    }, 10))
+    c.on('unselect', (e) => setTimeout(() => {
+      if (c.$(':selected').length === 0) this.select(null)
     }, 10))
 
     this.togglePan(this.state.pan)
